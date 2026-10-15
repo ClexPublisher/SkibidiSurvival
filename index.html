@@ -243,6 +243,7 @@
   .wbtn.bossw { background: #c0392b; }
   .wbtn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
   /* --- botones secundarios del menú --- */
+  .ver { position: absolute; right: 12px; bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   .menu-btns { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
   .sub {
     font-family: 'Press Start 2P', monospace; color: #fff; cursor: pointer;
@@ -535,6 +536,7 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
+  <div class="ver">VERSIÓN 1.01</div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -3188,10 +3190,110 @@ document.getElementById('modeMulti').addEventListener('click', () => { hideModes
 const mpScr = document.getElementById('mpScr');
 const MP_MAX = 4;
 let mpRoom = null, mpLobby = null, mpUser = null, mpGroup = null, mpCodeTyped = '', mpOffPeers = null, mpIsHost = false, mpHostSeen = false, mpCheckT = 0;
+
+/* ----- Multijugador fuera de Claude (por ejemplo en GitHub Pages): PeerJS (WebRTC) -----
+   Imita la "sala" de Claude: join(nombre) → grupo con peers(), presence(), onPeers(), leave().
+   El anfitrión es el centro: recibe la presencia de cada jugador y le manda a todos la lista completa. */
+const PJ_PREFIX = 'skibidisurvival-v1-';
+const PJ_SRC = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js'];
+function pjLoad() {
+  if (window.Peer) return Promise.resolve(true);
+  return PJ_SRC.reduce((prev, src) => prev.then(ok => ok || new Promise(res => {
+    const sc = document.createElement('script'); sc.src = src; sc.async = true;
+    sc.onload = () => res(!!window.Peer); sc.onerror = () => { sc.remove(); res(false); };
+    document.head.appendChild(sc);
+  })), Promise.resolve(false));
+}
+function pjPeer(id) {
+  return new Promise((res, rej) => {
+    const opts = Object.assign({ debug: 0 }, window.MP_PEER_OPTS || {});
+    const pe = id ? new Peer(id, opts) : new Peer(opts);
+    let opened = false;
+    const t = setTimeout(() => { try { pe.destroy(); } catch (e) {} rej(new Error('timeout')); }, 12000);
+    pe.on('open', () => { opened = true; clearTimeout(t); res(pe); });
+    pe.on('error', err => { if (opened) return; clearTimeout(t); try { pe.destroy(); } catch (e) {} rej(err); });
+  });
+}
+function pjGroup(code, asHost) {
+  const subs = new Set();
+  let me = null, mine = {}, others = [], peer = null, closed = false, beat = 0;
+  const conns = new Map();                // solo anfitrión: id → { conn, presence, seen }
+  let hostConn = null, lastHost = 0;      // solo invitados
+  const fire = () => { for (const f of subs) { try { f(); } catch (e) {} } };
+  const list = () => { const out = []; if (mine && Object.keys(mine).length) out.push({ by: me, presence: mine }); for (const [id, c] of conns) if (c.presence) out.push({ by: id, presence: c.presence }); return out; };
+  const sendAll = () => { const msg = { type: 'state', peers: list() }; for (const c of conns.values()) { try { if (c.conn.open) c.conn.send(msg); } catch (e) {} } };
+  const g = {
+    peers() {
+      if (asHost) return list().map(p => Object.assign({ sameTab: p.by === me }, p));
+      const out = others.filter(p => p.by !== me).map(p => Object.assign({ sameTab: false }, p));
+      if (Object.keys(mine).length) out.push({ by: me, presence: mine, sameTab: true });
+      return out;
+    },
+    async presence(obj) {
+      mine = Object.assign({}, mine, obj);
+      if (asHost) sendAll(); else if (hostConn && hostConn.open) { try { hostConn.send({ type: 'presence', presence: mine }); } catch (e) {} }
+      fire();
+    },
+    onPeers(f) { subs.add(f); return () => subs.delete(f); },
+    async leave() {
+      closed = true; clearInterval(beat);
+      try { if (asHost) for (const c of conns.values()) c.conn.send({ type: 'closed' }); else if (hostConn) hostConn.send({ type: 'bye' }); } catch (e) {}
+      setTimeout(() => { try { peer && peer.destroy(); } catch (e) {} }, 150);
+    }
+  };
+  const ready = (async () => {
+    if (asHost) {
+      peer = await pjPeer(PJ_PREFIX + code);       // si el código ya está en uso, falla y se prueba otro
+      me = peer.id;
+      peer.on('connection', conn => {
+        conn.on('open', () => {
+          const full = list().length >= MP_MAX;
+          conns.set(conn.peer, { conn, presence: null, seen: Date.now() });
+          try { conn.send({ type: 'state', peers: list() }); } catch (e) {}
+          if (full) setTimeout(() => { conns.delete(conn.peer); try { conn.close(); } catch (e) {} }, 1500);
+        });
+        conn.on('data', d => {
+          const c = conns.get(conn.peer); if (!c || !d) return;
+          c.seen = Date.now();
+          if (d.type === 'presence') { c.presence = d.presence; sendAll(); fire(); }
+          else if (d.type === 'bye') { conns.delete(conn.peer); sendAll(); fire(); }
+        });
+        conn.on('close', () => { if (conns.delete(conn.peer)) { sendAll(); fire(); } });
+      });
+      beat = setInterval(() => {                     // latido: avisa que sigue vivo y saca a los que se fueron
+        const now = Date.now(); let gone = false;
+        for (const [id, c] of conns) if (now - c.seen > 9000) { conns.delete(id); gone = true; try { c.conn.close(); } catch (e) {} }
+        sendAll(); if (gone) fire();
+      }, 2500);
+    } else {
+      peer = await pjPeer();
+      me = peer.id;
+      await new Promise(res => {
+        const t = setTimeout(res, 7000);
+        peer.on('error', () => { clearTimeout(t); res(); });        // 'peer-unavailable' = no existe el grupo
+        hostConn = peer.connect(PJ_PREFIX + code, { reliable: true });
+        hostConn.on('data', d => {
+          if (!d) return; lastHost = Date.now();
+          if (d.type === 'state') { others = d.peers || []; clearTimeout(t); res(); fire(); }
+          else if (d.type === 'closed') { others = []; fire(); }
+        });
+        hostConn.on('close', () => { if (!closed) { others = []; fire(); } });
+      });
+      beat = setInterval(() => {
+        if (hostConn && hostConn.open && Object.keys(mine).length) { try { hostConn.send({ type: 'presence', presence: mine }); } catch (e) {} }
+        if (lastHost && Date.now() - lastHost > 9000 && others.length) { others = []; fire(); }   // el anfitrión desapareció
+      }, 2500);
+    }
+    return g;
+  })();
+  return ready;
+}
+const pjLobby = { peerjs: true, join(name, asHost) { return pjGroup(name.replace(/^grupo-/, ''), asHost); } };
 const mpShow = id => { for (const b of ['mpHome', 'mpJoin', 'mpGroup']) document.getElementById(b).style.display = b === id ? 'flex' : 'none'; };
 async function mpConnect() {
   if (mpLobby) return mpLobby;
   try { if (window.claude && claude.use) { [mpLobby, mpUser] = await Promise.all([claude.use('room'), claude.use('user')]); } } catch (err) { mpLobby = null; }
+  if (!mpLobby && !(window.claude && claude.use)) { mpUser = null; mpLobby = (await pjLoad()) ? pjLobby : null; }   // fuera de Claude
   return mpLobby;
 }
 function openMp() {
@@ -3201,8 +3303,9 @@ function openMp() {
   mpConnect().then(r => {
     const ok = !!r;
     for (const id of ['mpCreate', 'mpJoinBtn']) document.getElementById(id).disabled = !ok;
-    note.textContent = ok ? 'Juega con hasta 3 amigos. Ellos también tienen que abrir este juego desde Claude.'
-                          : 'El multijugador solo funciona abriendo el juego dentro de Claude con tu cuenta. Tus amigos también deben tener el juego compartido.';
+    note.textContent = !ok ? 'No se pudo conectar al multijugador. Revisa tu internet y vuelve a intentar.'
+                     : r.peerjs ? 'Juega con hasta 3 amigos. Ellos tienen que abrir este mismo juego en su dispositivo.'
+                     : 'Juega con hasta 3 amigos. Ellos también tienen que abrir este juego desde Claude.';
   });
 }
 function mpMyPresence(extra) {
@@ -3211,8 +3314,11 @@ function mpMyPresence(extra) {
 async function mpEnter(code, asHost) {
   const msg = document.getElementById(asHost ? 'mpGroupMsg' : 'mpJoinMsg');
   try {
-    mpGroup = await mpLobby.join('grupo-' + code);
-  } catch (err) { msg.textContent = 'No se pudo conectar. Intenta de nuevo.'; return false; }
+    mpGroup = mpLobby.peerjs ? await mpLobby.join('grupo-' + code, asHost) : await mpLobby.join('grupo-' + code);
+  } catch (err) {
+    if (asHost && mpLobby.peerjs && err && err.type === 'unavailable-id') return mpEnter(String(1000 + Math.floor(Math.random() * 9000)), true);   // código ocupado: otro
+    msg.textContent = 'No se pudo conectar. Intenta de nuevo.'; return false;
+  }
   mpIsHost = asHost; mpHostSeen = asHost;
   // revisar que haya espacio (máximo 4)
   if (!asHost) {
@@ -3272,7 +3378,11 @@ async function mpRender() {
 document.getElementById('mpCreate').addEventListener('click', async () => {
   if (!(await mpConnect())) return;
   const code = String(1000 + Math.floor(Math.random() * 9000));
-  await mpEnter(code, true);
+  const note = document.getElementById('mpNote'), btn = document.getElementById('mpCreate');
+  note.textContent = 'Creando grupo…'; btn.disabled = true;
+  const ok = await mpEnter(code, true);
+  btn.disabled = false;
+  if (!ok) note.textContent = document.getElementById('mpGroupMsg').textContent || 'No se pudo crear el grupo. Intenta de nuevo.';
 });
 // teclado de números para escribir el código
 {
