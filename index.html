@@ -401,6 +401,8 @@
     .story-name { font-size: 10px; }
     .story-text { font-size: 12px; }
   }
+  .mp-wait { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 30; display: none; padding: 12px 16px; max-width: 92vw; text-align: center; line-height: 1.6;
+    font-family: 'Press Start 2P', monospace; font-size: clamp(10px, 2.6vw, 16px); color: #ffe14d; background: rgba(27,27,47,.85); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; pointer-events: none; }
   .fade-black { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 45; transition: opacity 2.5s ease-in; display: none; }
   .rewards { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .rw-box { background: #1b1b2f; border: 5px solid #ffe14d; box-shadow: 6px 6px 0 #000; padding: 26px 28px; display: flex; flex-direction: column; gap: 16px; align-items: center;
@@ -536,7 +538,7 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.01</div>
+  <div class="ver">VERSIÓN 1.02</div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -604,6 +606,7 @@
   <canvas id="storyChar" width="300" height="420"></canvas>
   <div class="story-box"><div class="story-name">JEFE CIENTÍFICO CAMARAMAN</div><div class="story-text" id="storyText"></div></div>
 </div>
+<div class="mp-wait" id="mpWait"></div>
 <div class="fade-black" id="fadeBlack"></div>
 <div class="rewards" id="rewards">
   <div class="rw-box">
@@ -1209,6 +1212,12 @@ const JACKETS = [
 ];
 // monedas y skins compradas (guardadas en el dispositivo)
 let coins = 0, owned = ['negra'];          // las skins gratis (que no son predeterminadas) también hay que comprarlas
+try {   // versión 1.02: todas las cuentas empiezan de cero (una sola vez en cada dispositivo)
+  if (!localStorage.getItem('skibidi_reset102')) {
+    for (const k of ['skibidi_coins', 'skibidi_owned', 'skibidi_jacket', 'skibidi_char', 'skibidi_spkskin', 'skibidi_tvskin', 'skibidi_skilllv', 'skibidi_gift1000']) localStorage.removeItem(k);
+    localStorage.setItem('skibidi_reset1', '1'); localStorage.setItem('skibidi_mig_free', '1'); localStorage.setItem('skibidi_reset102', '1');
+  }
+} catch (err) {}
 try { if (!localStorage.getItem('skibidi_reset1')) { localStorage.setItem('skibidi_coins', '0'); localStorage.setItem('skibidi_reset1', '1'); }   // monedas reiniciadas a 0 (una vez)
   coins = +(localStorage.getItem('skibidi_coins') || 0); owned = JSON.parse(localStorage.getItem('skibidi_owned') || 'null') || owned;
   if (!localStorage.getItem('skibidi_mig_free')) {          // una sola vez: la chaqueta café pasa a "por comprar"
@@ -1435,7 +1444,9 @@ function shoot(angle) {
   if (reload > 0 || over || paused) return;
   ball.aim = angle;
   const gx = ball.x + muzX(), gy = ball.y + muzY();     // sale desde la punta del arma
-  bullets.push({ x: gx, y: gy, vx: Math.cos(angle) * 260, vy: Math.sin(angle) * 260, life: 1 });
+  const vx = Math.cos(angle) * 260, vy = Math.sin(angle) * 260;
+  bullets.push({ x: gx, y: gy, vx, vy, life: 1 });
+  netLocal('shot', { x: r1(gx), y: r1(gy), vx: r1(vx), vy: r1(vy) });
   reload = RELOAD; flash = .07;
   playShot();
 }
@@ -1797,12 +1808,15 @@ function useInvDrink() {                         // bebida: velocidad 85 por 3 s
   burst(ball.x, ball.y - 8, 12, ['#7fd8ff', '#2e86de', '#ffffff']); drawInv();
 }
 function updateCrates(dt) {
-  for (let i = pendingCrates.length - 1; i >= 0; i--) { pendingCrates[i] -= dt; if (pendingCrates[i] <= 0) { pendingCrates.splice(i, 1); spawnCrate(); } }
+  if (!netClient()) for (let i = pendingCrates.length - 1; i >= 0; i--) { pendingCrates[i] -= dt; if (pendingCrates[i] <= 0) { pendingCrates.splice(i, 1); spawnCrate(); } }
   if (drinkT > 0) { drinkT = Math.max(0, drinkT - dt); if (drinkT === 0) drawInv(); }
   for (let i = crates.length - 1; i >= 0; i--) {
     const c = crates[i]; c.t += dt; c.flash = Math.max(0, c.flash - dt);
-    if (!c.open || over) continue;
-    if (Math.hypot(ball.x - c.x, ball.y - c.y) < 10) {          // tocar lo que salió de la caja
+    if (!c.open || netClient()) continue;          // en grupo, las cajas las maneja el anfitrión
+    const meHere = !over && Math.hypot(ball.x - c.x, ball.y - c.y) < 10;
+    const mateHere = !meHere && netHost() ? [...NET.mates.values()].find(m => !m.down && Math.hypot(m.x - c.x, m.y - c.y) < 10) : null;
+    if (mateHere) { netSend({ t: 'item', item: c.item }, mateHere.id); burst(c.x, c.y - 8, 10, ['#ffffff', '#ffe14d', '#ffd60a']); crates.splice(i, 1); continue; }
+    if (meHere) {          // tocar lo que salió de la caja
       // se guarda en el inventario (abajo, junto a las habilidades)
       if (c.item === 'kit') { invKit++; floatTexts.push({ x: c.x, y: c.y - 14, t: 0, txt: '+1 BOTIQUÍN', col: '#7dff9a' }); }
       else { invDrink++; floatTexts.push({ x: c.x, y: c.y - 14, t: 0, txt: '+1 BEBIDA', col: '#7fd8ff' }); }
@@ -1866,7 +1880,7 @@ function redFlash() {
 }
 
 // los enemigos aparecen repartidos: van rotando los 4 bordes y lejos de otros enemigos y de las últimas apariciones
-let sideBag = [], recentSpawns = [];
+let sideBag = [], recentSpawns = [], enemySeq = 0;
 function nextSide() {
   if (!sideBag.length) sideBag = [0, 1, 2, 3].sort(() => Math.random() - .5);
   return sideBag.pop();
@@ -1893,7 +1907,7 @@ function spawnEnemy() {
     // mini: más chico, muere de un disparo y quita media parte de la barra
     // grande: 5 disparos, quita una parte y media de la barra
     // jefe: 10 disparos (cada 2 se le cae una cabeza), quita 2 partes de la barra
-    enemies.push({ x, y, r: mini ? 5 : big ? 9 : boss ? 12 : spider ? 13 : 7, speed: spider ? 70 : boss ? 62 : mini ? 58 : (26 + Math.random() * 10 + Math.min(20, elapsed / 6)) * (big ? .5 : 1),   // velocidades fijas: araña 70, jefe de cabezas 62, mini 58 (jugador 70)
+    enemies.push({ id: ++enemySeq, x, y, r: mini ? 5 : big ? 9 : boss ? 12 : spider ? 13 : 7, speed: spider ? 70 : boss ? 62 : mini ? 58 : (26 + Math.random() * 10 + Math.min(20, elapsed / 6)) * (big ? .5 : 1),   // velocidades fijas: araña 70, jefe de cabezas 62, mini 58 (jugador 70)
                    hp: mini ? 1 : big && tough ? 6 : big ? 5 : tough ? 3 : boss ? 10 : spider ? 12 : 2, spider, jumpCd: 5, mini, big, tough, boss,
                    headOrder: boss ? [0, 1, 2, 3, 4].sort(() => Math.random() - .5) : null,
                    flash: 0, ph: Math.random() * 6, skin: tough ? (Math.random() < .35 ? SKIN_RF_BALD : SKIN_RF_HAIR) : pickSkin(!mini && !big) });
@@ -1925,15 +1939,21 @@ const freeCell = (i, j) => i >= 0 && j >= 0 && i < GN && j < GN && !gBlocked[j *
 let flowT = 0;
 function buildFlow() {
   gDist.fill(1e9);
-  const [pi, pj] = cellOf(ball.x, ball.y);
   // cola con prioridad simple (Dijkstra con cubetas, costos 10 y 14)
   // si el jugador está muy pegado a un obstáculo, se parte desde las celdas libres más cercanas
-  const buckets = [[pj * GN + pi]]; gDist[pj * GN + pi] = 0;
-  for (let dj = -2; dj <= 2; dj++) for (let di = -2; di <= 2; di++) {
-    const ni = pi + di, nj = pj + dj;
-    if (!freeCell(ni, nj) || (!di && !dj)) continue;
-    const c = Math.round(Math.hypot(di, dj) * 10), nk = nj * GN + ni;
-    gDist[nk] = c; (buckets[c] || (buckets[c] = [])).push(nk);
+  // en grupo se parte desde todos los jugadores vivos: cada enemigo va hacia el más cercano
+  const buckets = [[]];
+  const srcs = netHost() && NET.mates.size ? netAlive() : [];
+  if (!srcs.length) srcs.push({ x: ball.x, y: ball.y });
+  for (const sp of srcs) {
+    const [pi, pj] = cellOf(sp.x, sp.y);
+    gDist[pj * GN + pi] = 0; buckets[0].push(pj * GN + pi);
+    for (let dj = -2; dj <= 2; dj++) for (let di = -2; di <= 2; di++) {
+      const ni = pi + di, nj = pj + dj;
+      if (!freeCell(ni, nj) || (!di && !dj)) continue;
+      const c = Math.round(Math.hypot(di, dj) * 10), nk = nj * GN + ni;
+      if (c < gDist[nk]) { gDist[nk] = c; (buckets[c] || (buckets[c] = [])).push(nk); }
+    }
   }
   for (let c = 0; c < buckets.length; c++) {
     const b = buckets[c]; if (!b) continue;
@@ -2183,12 +2203,14 @@ function wander(e, dt) {
 let runCoins = 0, storyOn = false;
 const coinsFor = e => e.boss || e.spider ? 10 : e.big ? 5 : 3;
 function killEnemy(e, dir) {
+  if (netClient()) return;                         // en grupo, los enemigos los elimina el anfitrión
   const k = enemies.indexOf(e); if (k < 0) return;
   runCoins += coinsFor(e);
   corpses.push({ x: e.x, y: e.y, flip: ball.x < e.x, dir, t: 0, skin: e.skin || 0, mini: !!e.mini, big: !!e.big, tough: !!e.tough, boss: !!e.boss, spider: !!e.spider });
   stopSound(e);
   enemies.splice(k, 1); score++; killed++; drawLives(); drawWave();
-  if (killed >= waveSize(wave)) { if (wave >= 15) bossEnding(); else nextWave(); }
+  if (netHost()) netSend({ t: 'kill', id: e.id, x: r1(e.x), y: r1(e.y), dir, f: (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0), sk: e.skin || 0, c: coinsFor(e) });
+  if (killed >= waveSize(wave)) { if (wave >= 15) { if (netHost()) netSend({ t: 'win' }); bossEnding(); } else nextWave(); }
 }
 /* ----- al completar la oleada 15: habla el Jefe Científico Camaraman, la pantalla se pone negra y salen las recompensas ----- */
 const WIN_BONUS = 280;
@@ -2272,6 +2294,7 @@ function throwGrenade(tx, ty) {
   tx = Math.max(MIN, Math.min(MAX, tx)); ty = Math.max(MIN, Math.min(MAX, ty));
   const sx = ball.x + 6, sy = ball.y - 6, d = Math.hypot(tx - sx, ty - sy);
   grenades.push({ sx, sy, tx, ty, t: 0, T: Math.min(.9, .3 + d / 260), stun: hasSkill('bomba') });
+  netLocal('nade', { sx: r1(sx), sy: r1(sy), tx: r1(tx), ty: r1(ty), stun: hasSkill('bomba'), lv: 0 });
   setNade(false);
   nadeCd = NADE_RELOAD; drawNadeCd();          // empieza la recarga de 30 s
 }
@@ -2284,17 +2307,17 @@ function blastEnemy(e, fromX, extra = 0) {
   killEnemy(e, e.x >= fromX ? 1 : -1);
 }
 const isBossy = e => e.boss || e.spider;          // los que no se marean
-function explode(x, y, stun) {
+function explode(x, y, stun, lv, src) {
   if (stun) {                                     // BOMBA ATURDIDORA: explosión blanca que marea
     const R = BOOM_R + 14 * (skillLv('bomba') - 1), T = STUN_T + (skillLv('bomba') - 1);
-    booms.push({ x, y, t: 0, stun: true, R });
+    booms.push({ x, y, t: 0, stun: true, R }); netFx({ k: 'b', x: r1(x), y: r1(y), s: 1, R }, src);
     for (const e of enemies) {
       if (e.jump || isBossy(e) || Math.hypot(e.x - x, (e.y - 6) - y) > R + e.r) continue;
       e.stun = T; e.kb = null;
     }
     playBoom(); return;
   }
-  booms.push({ x, y, t: 0 });
+  booms.push({ x, y, t: 0 }); netFx({ k: 'b', x: r1(x), y: r1(y), s: 0 }, src);
   for (const e of enemies.slice()) {
     if (e.jump || Math.hypot(e.x - x, (e.y - 6) - y) > BOOM_R + e.r) continue;
     blastEnemy(e, x);
@@ -2338,6 +2361,7 @@ const SKILLS = {
 };
 const BOOST_T = 3, BOOST_RELOAD = 30, BOOST_MULT = 1.7, KITS = 3;
 let boostT = 0, boostCd = 0, kits = KITS;
+let skillLvs = {};
 const skillLv = id => 1;                         // nivel de cada habilidad (por ahora todas en I)
 const STUN_T = 3, SONIC_RELOAD = 30, ENEMY_W = 14;   // ENEMY_W: "un enemigo" de distancia
 let waveCd = 0, pushCd = 0;
@@ -2355,6 +2379,7 @@ function sonicSound(push) {
 function sonicWave() {                           // ONDA SÓNICA: daño de granada a unos 2 enemigos de distancia
   const R = ENEMY_W * 2 + 4, extra = skillLv('onda') - 1;
   sonics.push({ x: ball.x, y: ball.y - 6, t: 0, R, col: '160,230,255' });
+  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R, col: 'o' }); netLocal('sonic', { p: 0, lv: 0 });
   for (const e of enemies.slice()) {
     if (e.jump || atBack(e) || Math.hypot(e.x - ball.x, e.y - ball.y) > R + e.r) continue;
     blastEnemy(e, ball.x, extra);
@@ -2364,6 +2389,7 @@ function sonicWave() {                           // ONDA SÓNICA: daño de grana
 function sonicPush() {                           // EMPUJE SÓNICO: los lanza lejos (3 enemigos; los pesados 2)
   const R = ENEMY_W * 2 + 6, up = skillLv('empuje') - 1;
   sonics.push({ x: ball.x, y: ball.y - 6, t: 0, R: R + 10, col: '255,225,120' });
+  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R: R + 10, col: 'p' }); netLocal('sonic', { p: 1, lv: 0 });
   for (const e of enemies) {
     if (e.jump || atBack(e)) continue;
     const dx = e.x - ball.x, dy = e.y - ball.y, d = Math.hypot(dx, dy) || 1;
@@ -2392,7 +2418,8 @@ let lightT = 0, lightCd = 0, bladeUses = 0, bladeCd = 0, teleSel = false, teleT 
 const slashes = [];
 const inLight = e => !atBack(e) && Math.hypot(e.x - ball.x, e.y - ball.y) <= LIGHT_R + e.r;
 function setTele(on) { teleSel = on; teleBtn.classList.toggle('sel', on); if (on) setNade(false); }
-function bladeStrike(wx, wy) {                    // golpe de cuchilla donde tocaste (a lo más 1 enemigo de distancia)
+function bladeStrike(wx, wy, remote) {            // golpe de cuchilla donde tocaste (a lo más 1 enemigo de distancia)
+  netLocal('blade', { wx: r1(wx), wy: r1(wy) });
   const ox = ball.x, oy = ball.y - 6;
   let dx = wx - ox, dy = wy - oy; const d = Math.hypot(dx, dy) || 1;
   if (d > BLADE_R) { dx = dx / d * BLADE_R; dy = dy / d * BLADE_R; }
@@ -2404,6 +2431,7 @@ function bladeStrike(wx, wy) {                    // golpe de cuchilla donde toc
     if (e.hp <= 0) killEnemy(e, e.x >= ox ? 1 : -1);
   }
   bladeSound();
+  if (remote) return;                             // golpe de otro jugador (lo hace el anfitrión por él)
   bladeUses--; if (bladeUses <= 0) { bladeUses = 0; bladeCd = SONIC_RELOAD; }
   drawSkills();
 }
@@ -2616,7 +2644,7 @@ skillPress(kitBtn, () => {
 }
 skillPress(waveBtn, () => { if (waveCd > 0) return; playClick(); sonicWave(); waveCd = SONIC_RELOAD; drawSkills(); });
 skillPress(pushBtn, () => { if (pushCd > 0) return; playClick(); sonicPush(); pushCd = SONIC_RELOAD; drawSkills(); });
-skillPress(lightBtn, () => { if (lightT > 0 || lightCd > 0) return; playClick(); lightT = LIGHT_T + 2 * (skillLv('luz') - 1); lightCd = SONIC_RELOAD; drawSkills(); });
+skillPress(lightBtn, () => { if (lightT > 0 || lightCd > 0) return; playClick(); lightT = LIGHT_T + 2 * (skillLv('luz') - 1); lightCd = SONIC_RELOAD; drawSkills(); netLocal('light', { d: lightT }); });
 skillPress(bladeBtn, () => { if (bladeUses > 0 || bladeCd > 0) return; playClick(); bladeUses = BLADE_USES + (skillLv('cuchilla') - 1); drawSkills(); });
 skillPress(teleBtn, () => { if (teleT > 0 || teleCd > 0) return; playClick(); setTele(!teleSel); });
 function updateSkills(dt) {
@@ -2642,7 +2670,7 @@ function updateGrenades(dt) {
   }
   for (let i = grenades.length - 1; i >= 0; i--) {
     const n = grenades[i]; n.t += dt;
-    if (n.t >= n.T) { grenades.splice(i, 1); explode(n.tx, n.ty, n.stun); }
+    if (n.t >= n.T) { grenades.splice(i, 1); explode(n.tx, n.ty, n.stun, n.lv, n.src); }
   }
   for (let i = booms.length - 1; i >= 0; i--) {
     const b = booms[i]; b.t += dt;
@@ -2743,10 +2771,15 @@ function drawJumpShadows(cx, cy) {
 }
 
 function hitPlayer(amount) {
+  if (curMate) {                                   // le pegaron a otro jugador del grupo: se le avisa
+    if (curMate.down || hurt > 0) return;
+    hurt = 1.2; burst(ball.x, ball.y - 6, 10, ['#ff3b2f', '#e07a1f']);
+    netSend({ t: 'hit', a: amount }, curMate.id); return;
+  }
   if (over || paused || hurt > 0) return;
   lives = Math.max(0, lives - amount); hurt = 1.2; drawLives();
   burst(ball.x, ball.y - 6, 10, ['#ff3b2f', '#e07a1f']);
-  if (lives <= 0) gameOver();
+  if (lives <= 0) { if (netOn()) netGoDown(); else gameOver(); }
   redFlash();
 }
 
@@ -2818,38 +2851,24 @@ function drawShocks(cx, cy) {
   g.globalAlpha = 1;
 }
 
-function updateEnemies(dt) {
-  flowT -= dt;
-  if (flowT <= 0) { buildFlow(); flowT = .2; }
-  spawnT -= dt;
-  if (spawnT <= 0) {
-    spawnEnemy();
-    spawnT = Math.max(.9, 2.6 - elapsed / 25);        // cada vez aparecen más seguido
-  }
-  // como máximo 5 persiguen al jugador; si hay 4 o menos, el que deambula más cerca se suma
-  let chasing = 0;
-  for (const e of enemies) if (e.chase) chasing++;
-  if (chasing < MAX_CHASERS) {
-    const idle = enemies.filter(e => !e.chase).sort((a, b) => Math.hypot(a.x - ball.x, a.y - ball.y) - Math.hypot(b.x - ball.x, b.y - ball.y));
-    for (const e of idle) { if (chasing >= MAX_CHASERS) break; e.chase = true; e.wt = null; chasing++; }
-  }
-  for (const e of enemies) {
+// un paso de un enemigo (en grupo, ball es el jugador al que persigue)
+function stepEnemy(e, dt) {
     e.flash = Math.max(0, e.flash - dt); e.ph += dt * 8;
     const d = Math.hypot(ball.x - e.x, ball.y - e.y) || 1;
-    if (over && d < 15) continue;
-    if (e.jump) continue;                              // en el aire: no camina
+    if (over && d < 15) return;
+    if (e.jump) return;                              // en el aire: no camina
     if (e.kb) {                                        // EMPUJE SÓNICO: sale disparado
       const nx = e.x + e.kb.vx * dt, ny = e.y + e.kb.vy * dt;
       if (enemyFree(nx, e.y, e.r) && nx > MIN && nx < MAX) e.x = nx;
       if (enemyFree(e.x, ny, e.r) && ny > MIN && ny < MAX) e.y = ny;
       e.kb.t -= dt; if (e.kb.t <= 0) e.kb = null;
-      continue;
+      return;
     }
-    if (e.stun > 0) { e.stun -= dt; continue; }        // BOMBA ATURDIDORA: mareado y quieto
-    e.para = lightT > 0 && !over && !isBossy(e) && inLight(e);   // LUZ AZUL: paralizado mientras lo toca la luz
-    if (e.para) continue;
+    if (e.stun > 0) { e.stun -= dt; return; }        // BOMBA ATURDIDORA: mareado y quieto
+    e.para = !isBossy(e) && anyLight(e);   // LUZ AZUL: paralizado mientras lo toca la luz
+    if (e.para) return;
     // enemigos que esperan su turno: caminan por ahí hacia puntos al azar, más lento
-    if (!e.chase && !over) { wander(e, dt); continue; }
+    if (!e.chase && !over) { wander(e, dt); return; }
     // si un obstáculo tapa el camino, sigue la ruta que lo rodea
     // ¿se quedó trabado? cada medio segundo revisa cuánto avanzó
     e.avoidT = Math.max(0, (e.avoidT || 0) - dt);
@@ -2878,7 +2897,24 @@ function updateEnemies(dt) {
     else if (enemyFree(e.x + dx * sp, e.y, e.r)) e.x += dx * sp;
     else if (enemyFree(e.x, e.y + dy * sp, e.r)) e.y += dy * sp;
     else { const sx = -dy * sp * (e.ph % 12 < 6 ? 1 : -1), sy = dx * sp * (e.ph % 12 < 6 ? 1 : -1); if (enemyFree(e.x + sx, e.y + sy, e.r)) { e.x += sx; e.y += sy; } }
+}
+function updateEnemies(dt) {
+  if (netClient()) { netClientEnemies(dt); return; }   // en grupo, el invitado solo copia lo que manda el anfitrión
+  flowT -= dt;
+  if (flowT <= 0) { buildFlow(); flowT = .2; }
+  spawnT -= dt;
+  if (spawnT <= 0) {
+    spawnEnemy();
+    spawnT = Math.max(.9, 2.6 - elapsed / 25);        // cada vez aparecen más seguido
   }
+  // como máximo 5 persiguen al jugador; si hay 4 o menos, el que deambula más cerca se suma
+  let chasing = 0;
+  for (const e of enemies) if (e.chase) chasing++;
+  if (chasing < MAX_CHASERS) {
+    const idle = enemies.filter(e => !e.chase).sort((a, b) => nearDist(a) - nearDist(b));
+    for (const e of idle) { if (chasing >= MAX_CHASERS) break; e.chase = true; e.wt = null; chasing++; }
+  }
+  for (const e of enemies) { swapTo(e); try { stepEnemy(e, dt); } finally { swapBack(); } }   // cada uno va por el jugador más cercano
   // no se encimen entre ellos
   for (let i = 0; i < enemies.length; i++) for (let j = i + 1; j < enemies.length; j++) {
     const a = enemies[i], b = enemies[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r + b.r + 1;
@@ -2902,15 +2938,15 @@ function updateEnemies(dt) {
   }
   // enemigos contra el jugador
   hurt = Math.max(0, hurt - dt);
-  for (const e of enemies) { if (e.boss) bossAttacks(e, dt); if (e.spider) spiderJump(e, dt); }
-  for (const e of enemies) {
+  for (const e of enemies) { swapTo(e); try { if (e.boss) bossAttacks(e, dt); if (e.spider) spiderJump(e, dt); } finally { swapBack(); } }
+  for (const e of enemies) { swapTo(e); try {
     if (!over && !paused && hurt <= 0 && !e.jump && !(e.stun > 0) && !e.kb && !e.para && Math.hypot(e.x - ball.x, e.y - ball.y) < e.r + ball.r - 1) {
       hitPlayer(e.mini ? .5 : e.big ? 1.5 : e.boss ? 2 : 1);
       // empuja al enemigo hacia atrás
       const d = Math.hypot(e.x - ball.x, e.y - ball.y) || 1;
       for (let s = 0; s < 6; s++) { const nx = e.x + (e.x - ball.x) / d * 3, ny = e.y + (e.y - ball.y) / d * 3; if (enemyFree(nx, ny, e.r)) { e.x = nx; e.y = ny; } }
     }
-  }
+  } finally { swapBack(); } }
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .9; p.vy *= .9; p.life -= dt;
     if (p.life <= 0) parts.splice(i, 1);
@@ -2957,7 +2993,7 @@ function drawEnemies(cx, cy) {
     g.imageSmoothingEnabled = false;
     g.restore();
     if (e.stun > 0) drawDizzy(e, ex, ey);
-    if (e.para && lightT > 0) {                    // chispas azules de parálisis
+    if (e.para) {                    // chispas azules de parálisis
       for (let i = 0; i < 3; i++) { const a = t * 9 + i * 2.1; g.fillStyle = i % 2 ? '#bfe4ff' : '#4aa3ff'; g.fillRect(Math.round(ex + Math.cos(a) * 7) - 1, Math.round(ey - 12 + Math.sin(a * 1.3) * 7) - 1, 2, 2); }
     }
   }
@@ -2975,6 +3011,7 @@ function gameOver() {
   document.getElementById('finalScore').textContent = score;
   document.getElementById('overWave').textContent = wave;
   document.getElementById('overCoins').textContent = '● +' + grantCoins(waveBonus(wave)); runCoins = 0;
+  document.getElementById('retry').textContent = netOn() ? 'MENÚ' : '↻ REINTENTAR';
   overTimer = setTimeout(() => document.getElementById('over').style.display = 'flex', 1400);
   resetJoy();
 }
@@ -2984,7 +3021,7 @@ function restart() {
   grenades.length = 0; booms.length = 0; smokes.length = 0; shocks.length = 0; setNade(false); nadeCd = 0; drawNadeCd(); resetSkills();
   enemies.length = 0; parts.length = 0; bullets.length = 0; corpses.length = 0;
   lives = MAX_LIVES; score = 0; hurt = 0; spawnT = 1.5; elapsed = 0; reload = 0; over = false;
-  clearTimeout(overTimer); runCoins = 0; storyOn = false; rewarded = false;
+  clearTimeout(overTimer); runCoins = 0; storyOn = false; rewarded = false; document.getElementById('mpWait').style.display = 'none';
   crates.length = 0; floatTexts.length = 0; pendingCrates = []; cratePlan = {}; drinkT = 0; invKit = 0; invDrink = 0; drawInv();
   for (const id of ['story', 'rewards']) document.getElementById(id).style.display = 'none';
   const fb = document.getElementById('fadeBlack'); fb.style.transition = 'none'; fb.style.opacity = '0'; fb.style.display = 'none'; void fb.offsetWidth; fb.style.transition = '';
@@ -2994,7 +3031,7 @@ function restart() {
   document.getElementById('over').style.display = 'none';
   drawLives();
 }
-document.getElementById('retry').addEventListener('click', restart);
+document.getElementById('retry').addEventListener('click', () => { if (netOn() || mpGroup) goMenu(); else restart(); });
 
 /* personaje derrotado: acostado de lado, con la cabeza ladeada y el arma en el suelo */
 function drawDead(px, py) {
@@ -3056,6 +3093,7 @@ function loop(now) {
   updateCrates(dt);
   updateShocks(dt);
   updateSounds();
+  netTick(dt);
   if (over) {
     deadT += dt;
     // chispas de vez en cuando, como un aparato dañado
@@ -3109,7 +3147,9 @@ function loop(now) {
   drawJumpShadows(cx, cy);
   drawCrates(cx, cy);
   drawLight(cx, cy);
+  drawMateLights(cx, cy);
   drawEnemies(cx, cy);
+  drawMates(cx, cy);
   if (over) drawDead(px, py);
   else if (!(hurt > 0 && Math.floor(t * 12) % 2 === 0)) {   // parpadea al recibir daño
     drawHeroPart(0, 1, px - 9, py - 19 + bob);
@@ -3122,8 +3162,8 @@ function loop(now) {
   drawParts(cx, cy);
   drawGrenades(cx, cy);
 
-  // balas
-  for (const b of bullets) {
+  // balas (en grupo también las de los demás)
+  for (const b of netClient() ? bullets.concat(NET.bul) : bullets) {
     const bx = Math.round(b.x - cx), by = Math.round(b.y - cy);
     g.fillStyle = 'rgba(255,214,10,.4)'; g.fillRect(bx - 1 - Math.round(b.vx / 110), by - 1 - Math.round(b.vy / 110), 3, 3);
     g.fillStyle = '#c99a00'; g.fillRect(bx - 2, by - 1, 4, 2); g.fillRect(bx - 1, by - 2, 2, 4);
@@ -3215,20 +3255,30 @@ function pjPeer(id) {
   });
 }
 function pjGroup(code, asHost) {
-  const subs = new Set();
+  const subs = new Set(), msgSubs = new Set();
   let me = null, mine = {}, others = [], peer = null, closed = false, beat = 0;
+  const gotMsg = (from, m) => { for (const f of msgSubs) { try { f(from, m); } catch (e) { console.error(e); } } };
   const conns = new Map();                // solo anfitrión: id → { conn, presence, seen }
   let hostConn = null, lastHost = 0;      // solo invitados
   const fire = () => { for (const f of subs) { try { f(); } catch (e) {} } };
-  const list = () => { const out = []; if (mine && Object.keys(mine).length) out.push({ by: me, presence: mine }); for (const [id, c] of conns) if (c.presence) out.push({ by: id, presence: c.presence }); return out; };
+  const list = () => { const out = []; if (mine && Object.keys(mine).length) out.push({ by: me, peer: me, presence: mine }); for (const [id, c] of conns) if (c.presence) out.push({ by: id, peer: id, presence: c.presence }); return out; };
   const sendAll = () => { const msg = { type: 'state', peers: list() }; for (const c of conns.values()) { try { if (c.conn.open) c.conn.send(msg); } catch (e) {} } };
   const g = {
     peers() {
       if (asHost) return list().map(p => Object.assign({ sameTab: p.by === me }, p));
       const out = others.filter(p => p.by !== me).map(p => Object.assign({ sameTab: false }, p));
-      if (Object.keys(mine).length) out.push({ by: me, presence: mine, sameTab: true });
+      if (Object.keys(mine).length) out.push({ by: me, peer: me, presence: mine, sameTab: true });
       return out;
     },
+    peerjs: true,
+    get me() { return me; },
+    // mensajes del juego: el anfitrión se los manda a todos (o a uno); los demás se los mandan al anfitrión
+    send(m) {
+      if (asHost) { for (const c of conns.values()) { try { if (c.conn.open) c.conn.send({ type: 'net', m }); } catch (e) {} } }
+      else if (hostConn && hostConn.open) { try { hostConn.send({ type: 'net', m }); } catch (e) {} }
+    },
+    sendTo(id, m) { const c = conns.get(id); if (c && c.conn.open) { try { c.conn.send({ type: 'net', m }); } catch (e) {} } },
+    onMsg(f) { msgSubs.add(f); return () => msgSubs.delete(f); },
     async presence(obj) {
       mine = Object.assign({}, mine, obj);
       if (asHost) sendAll(); else if (hostConn && hostConn.open) { try { hostConn.send({ type: 'presence', presence: mine }); } catch (e) {} }
@@ -3255,6 +3305,7 @@ function pjGroup(code, asHost) {
         conn.on('data', d => {
           const c = conns.get(conn.peer); if (!c || !d) return;
           c.seen = Date.now();
+          if (d.type === 'net') { gotMsg(conn.peer, d.m); return; }
           if (d.type === 'presence') { c.presence = d.presence; sendAll(); fire(); }
           else if (d.type === 'bye') { conns.delete(conn.peer); sendAll(); fire(); }
         });
@@ -3274,6 +3325,7 @@ function pjGroup(code, asHost) {
         hostConn = peer.connect(PJ_PREFIX + code, { reliable: true });
         hostConn.on('data', d => {
           if (!d) return; lastHost = Date.now();
+          if (d.type === 'net') { gotMsg(PJ_PREFIX + code, d.m); return; }
           if (d.type === 'state') { others = d.peers || []; clearTimeout(t); res(); fire(); }
           else if (d.type === 'closed') { others = []; fire(); }
         });
@@ -3327,6 +3379,7 @@ async function mpEnter(code, asHost) {
     if (!others.some(p => p.presence && p.presence.host)) { msg.textContent = 'No existe un grupo con ese código.'; await mpLeave(); return false; }
     if (others.length >= MP_MAX) { msg.textContent = 'Ese grupo está lleno (máximo 4).'; await mpLeave(); return false; }
   }
+  if (!asHost) { const h = mpGroup.peers().find(p => p.presence && p.presence.host); mpPlayedStart = (h && h.presence.start) || 0; }   // si ya empezaron, no entras a esa partida
   await mpGroup.presence(mpMyPresence());
   document.getElementById('mpCode').textContent = code;
   document.getElementById('mpGroupMsg').textContent = '';
@@ -3345,10 +3398,15 @@ async function mpRender() {
   const peers = mpGroup.peers().slice().sort((a, b) => ((b.presence && b.presence.host) ? 1 : 0) - ((a.presence && a.presence.host) ? 1 : 0) || (a.presence.t || 0) - (b.presence.t || 0));
   const host = peers.find(p => p.presence && p.presence.host);
   if (host) mpHostSeen = true;
+  if (netHost()) {                                    // alguien se fue en plena partida: cuenta como caído
+    const ids = new Set(peers.map(pid));
+    for (const m of NET.mates.values()) if (!ids.has(m.id) && !m.gone) { m.down = true; m.gone = true; }
+    netCheckOver();
+  }
   // el anfitrión se fue: el grupo se cierra
-  if (!mpIsHost && mpHostSeen && !host) { await mpLeave(); mpShow('mpHome'); document.getElementById('mpNote').textContent = 'El anfitrión cerró el grupo.'; return; }
+  if (!mpIsHost && mpHostSeen && !host) { if (netClient() && running) netTeamOver(); await mpLeave(); mpShow('mpHome'); document.getElementById('mpNote').textContent = 'El anfitrión cerró el grupo.'; return; }
   // el anfitrión empezó la partida
-  if (!mpIsHost && host && host.presence.start) { document.getElementById('mpGroupMsg').textContent = '¡El anfitrión empezó! El juego en equipo llega en la próxima actualización.'; }
+  if (!mpIsHost && host && host.presence.start) { document.getElementById('mpGroupMsg').textContent = 'La partida ya empezó. Espera a que termine.'; mpPlayStart(host.presence.start); }
   const ids = peers.map(p => p.by).filter(Boolean);
   const profs = mpUser && ids.length ? await mpUser.profiles(ids) : {};
   const box = document.getElementById('mpPlayers'); box.innerHTML = '';
@@ -3374,6 +3432,290 @@ async function mpRender() {
   start.disabled = peers.length < 2;
   start.textContent = peers.length < 2 ? 'ESPERANDO JUGADORES…' : 'EMPEZAR';
   if (!mpIsHost && !(host && host.presence.start)) document.getElementById('mpGroupMsg').textContent = 'Esperando a que el anfitrión empiece…';
+}
+/* ================= MULTIJUGADOR EN PARTIDA =================
+   El anfitrión maneja a los enemigos, las oleadas y las cajas. Cada jugador mueve a su propio personaje y le avisa al anfitrión
+   dónde está y qué hace (disparos, granadas, habilidades). El anfitrión manda a todos, unas 12 veces por segundo, dónde está cada enemigo
+   y cada jugador; también avisa cuando muere un enemigo, cuando golpean a alguien o cuando termina la partida. */
+const NET = { bul: [], role: null, me: null, hostId: null, mates: new Map(), others: new Map(), mirror: new Map(), snapT: 0, posT: 0, offMsg: null, exec: null };
+const netOn = () => !!NET.role;
+const netHost = () => NET.role === 'host', netClient = () => NET.role === 'client';
+const pid = p => p.peer || p.by;
+function netSend(m, to) {
+  if (!mpGroup) return;
+  if (mpGroup.peerjs) { if (to) mpGroup.sendTo(to, m); else mpGroup.send(m); }
+  else { try { const r = mpGroup.emit('net', { to: to || null, m }); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+}
+function netListen(fn) {
+  if (mpGroup.peerjs) return mpGroup.onMsg(fn);
+  return mpGroup.on('net', msg => {
+    if (msg.sameTab) return;
+    const d = msg.data || {};
+    if (d.to && d.to !== NET.me) return;
+    fn(msg.peer, d.m);
+  });
+}
+// empieza la partida en grupo (se llama justo antes de la historia)
+function netStart() {
+  netStop();
+  const peers = mpSorted(), mine = peers.find(p => p.sameTab), host = peers.find(p => p.presence && p.presence.host);
+  if (!mine || !host) return;
+  NET.me = pid(mine); NET.hostId = pid(host); NET.role = mpIsHost ? 'host' : 'client';
+  let n = 1;
+  for (const p of peers) {
+    n++;
+    if (p.sameTab) continue;
+    const pr = p.presence || {}, id = pid(p);
+    const m = { id, x: ball.x, y: ball.y, dx: ball.x, dy: ball.y, char: pr.char, skin: pr.skin, down: false, hurt: 0, lightT: 0, tag: 'J' + (peers.indexOf(p) + 1) };
+    if (netHost()) NET.mates.set(id, m); else NET.others.set(id, m);
+  }
+  NET.offMsg = netListen(netMsg);
+}
+function netStop() {
+  if (NET.offMsg) { try { NET.offMsg(); } catch (e) {} }
+  NET.role = null; NET.offMsg = null; NET.mates.clear(); NET.others.clear();
+  for (const e of NET.mirror.values()) stopSound(e);
+  NET.mirror.clear(); NET.bul = [];
+}
+// lo que hago yo y los demás tienen que saber (si soy invitado, se lo aviso al anfitrión)
+function netLocal(t, data) { if (netClient() && !NET.exec) netSend(Object.assign({ t }, data)); }
+// efectos que ve todo el grupo (explosiones, ondas): los manda el anfitrión
+function netFx(fx, src) { if (netHost()) netSend(Object.assign({ t: 'fx', src: src || (NET.exec ? NET.exec.id : NET.me) }, fx)); }
+// el anfitrión ejecuta una habilidad de otro jugador como si estuviera en su lugar
+function netAs(m, lvs, fn) {
+  const bx = ball.x, by = ball.y, old = skillLvs;
+  ball.x = m.x; ball.y = m.y; skillLvs = Object.assign({}, skillLvs, lvs || {}); NET.exec = m;
+  try { fn(); } finally { ball.x = bx; ball.y = by; skillLvs = old; NET.exec = null; }
+}
+/* ----- a quién persigue cada enemigo: al jugador vivo más cercano ----- */
+function netAlive() {
+  const out = [];
+  if (!over) out.push({ self: true, x: ball.x, y: ball.y });
+  if (netHost()) for (const m of NET.mates.values()) if (!m.down) out.push(m);
+  return out;
+}
+const nearDist = e => { let best = 1e9; for (const p of netAlive()) best = Math.min(best, Math.hypot(e.x - p.x, e.y - p.y)); return best === 1e9 ? Math.hypot(e.x - ball.x, e.y - ball.y) : best; };
+let swapSave = null, curMate = null;
+function swapTo(e) {
+  curMate = null;
+  if (!netHost() || !NET.mates.size) return;
+  let best = null, bd = 1e9;
+  for (const p of netAlive()) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = p; } }
+  if (!best || best.self) return;
+  swapSave = [ball.x, ball.y, hurt, over];
+  ball.x = best.x; ball.y = best.y; hurt = best.hurt || 0; over = !!best.down; curMate = best;
+}
+function swapBack() {
+  if (!curMate) return;
+  curMate.hurt = hurt;
+  [ball.x, ball.y, hurt, over] = swapSave; curMate = null;
+}
+// ¿alguna luz azul (mía o de otro jugador) toca a este enemigo?
+function anyLight(e) {
+  const at = (x, y) => { const dx = e.x - x, dy = e.y - y; return !(dy < 0 && Math.abs(dx) < -dy) && Math.hypot(dx, dy) <= LIGHT_R + e.r; };
+  const me = swapSave && curMate ? swapSave : [ball.x, ball.y, 0, over];
+  if (lightT > 0 && !me[3] && at(me[0], me[1])) return true;
+  if (netHost()) for (const m of NET.mates.values()) if (m.lightT > 0 && !m.down && at(m.x, m.y)) return true;
+  return false;
+}
+/* ----- cada cuadro ----- */
+let netClock = 0;
+function netTick(dt) {
+  const now = performance.now(), real = Math.min(.1, (now - (netClock || now)) / 1000); netClock = now;
+  if (!netOn()) return;
+  if (netHost()) {
+    for (const m of NET.mates.values()) { m.hurt = Math.max(0, (m.hurt || 0) - dt); m.lightT = Math.max(0, (m.lightT || 0) - dt); }
+    NET.snapT -= real;
+    if (NET.snapT <= 0) { NET.snapT = 1 / 12; netSend(netSnap()); }
+  } else {
+    NET.posT -= real;
+    if (NET.posT <= 0) { NET.posT = 1 / 12; netSend({ t: 'pos', x: +ball.x.toFixed(1), y: +ball.y.toFixed(1), d: over ? 1 : 0, c: charSel, s: curSkin(charSel), l: lightT > 0 ? 1 : 0 }); }
+  }
+  // los demás jugadores se deslizan suave hacia su última posición
+  const k = Math.min(1, dt * 14);
+  for (const m of (netHost() ? NET.mates : NET.others).values()) { m.dx += (m.x - m.dx) * k; m.dy += (m.y - m.dy) * k; }
+}
+const r1 = v => Math.round(v * 10) / 10;
+function netSnap() {
+  const en = enemies.map(e => [e.id, r1(e.x), r1(e.y),
+    (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0),
+    e.skin || 0, e.hp, (e.left ?? ball.x < e.x) ? 1 : 0, e.stun > 0 ? 1 : 0, e.para ? 1 : 0, e.flash > 0 ? 1 : 0,
+    e.jump ? [r1(e.jump.t), r1(e.jump.tx), r1(e.jump.ty)] : 0,
+    e.bite ? [e.bite.i, r1(e.bite.t), r1(e.bite.dx), r1(e.bite.dy), e.bite.left ? 1 : 0] : 0,
+    e.slam ? [r1(e.slam.t)] : 0, e.headOrder || 0]);
+  const pl = [[NET.me, r1(ball.x), r1(ball.y), charSel, curSkin(charSel), over ? 1 : 0, lightT > 0 ? 1 : 0]];
+  for (const m of NET.mates.values()) if (!m.gone) pl.push([m.id, r1(m.x), r1(m.y), m.char, m.skin, m.down ? 1 : 0, m.lightT > 0 ? 1 : 0]);
+  const cr = crates.map(c => [r1(c.x), r1(c.y), c.open ? 1 : 0, c.item === 'kit' ? 1 : 0, c.flash > 0 ? 1 : 0]);
+  const idx = new Map(pl.map((p, i) => [p[0], i]));     // balas de todos (para que se vea quién dispara)
+  const bl = bullets.slice(-30).map(b => [r1(b.x), r1(b.y), Math.round(b.vx), Math.round(b.vy), idx.get(b.own || NET.me) ?? 0]);
+  return { t: 'snap', w: wave, k: killed, en, pl, cr, bl };
+}
+/* ----- mensajes ----- */
+function netMsg(from, m) {
+  if (!m || typeof m !== 'object' || !netOn()) return;
+  if (netHost()) {
+    const mt = NET.mates.get(from); if (!mt) return;
+    if (m.t === 'pos') {
+      if (typeof m.x === 'number' && typeof m.y === 'number') { mt.x = Math.max(MIN, Math.min(MAX, m.x)); mt.y = Math.max(MIN, Math.min(MAX, m.y)); }
+      if (CHARS.some(c => c.id === m.c)) mt.char = m.c; if (typeof m.s === 'string') mt.skin = m.s;
+      if (m.d && !mt.down) { mt.down = true; netCheckOver(); }
+    } else if (m.t === 'shot') {
+      if ([m.x, m.y, m.vx, m.vy].every(v => typeof v === 'number')) bullets.push({ x: m.x, y: m.y, vx: m.vx, vy: m.vy, life: 1, own: from });
+    } else if (m.t === 'nade') {
+      if (![m.sx, m.sy, m.tx, m.ty].every(v => typeof v === 'number')) return;
+      const d = Math.hypot(m.tx - m.sx, m.ty - m.sy);
+      grenades.push({ sx: m.sx, sy: m.sy, tx: Math.max(MIN, Math.min(MAX, m.tx)), ty: Math.max(MIN, Math.min(MAX, m.ty)), t: 0, T: Math.min(.9, .3 + d / 260), stun: !!m.stun, lv: Math.max(0, Math.min(3, m.lv | 0)), src: from });
+    } else if (m.t === 'sonic') {
+      netAs({ id: from, x: mt.x, y: mt.y }, { onda: m.lv | 0, empuje: m.lv | 0 }, () => m.p ? sonicPush() : sonicWave());
+    } else if (m.t === 'blade') {
+      if (typeof m.wx === 'number' && typeof m.wy === 'number') netAs({ id: from, x: mt.x, y: mt.y }, null, () => bladeStrike(m.wx, m.wy, true));
+    } else if (m.t === 'light') {
+      mt.lightT = Math.max(0, Math.min(14, +m.d || 0));
+    } else if (m.t === 'down') { mt.down = true; netCheckOver(); }
+    return;
+  }
+  // invitado: solo escucha al anfitrión
+  if (from !== NET.hostId) return;
+  if (m.t === 'snap') netApplySnap(m);
+  else if (m.t === 'kill') {
+    const e = NET.mirror.get(m.id); if (e) { stopSound(e); NET.mirror.delete(m.id); const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); }
+    const f = m.f | 0;
+    corpses.push({ x: m.x, y: m.y, flip: ball.x < m.x, dir: m.dir, t: 0, skin: m.sk || 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16) });
+    runCoins += m.c | 0; score++; drawLives();
+  } else if (m.t === 'hit') { hitPlayer(+m.a || 1, true); }
+  else if (m.t === 'item') {
+    if (m.item === 'kit') { invKit++; floatTexts.push({ x: ball.x, y: ball.y - 26, t: 0, txt: '+1 BOTIQUÍN', col: '#7dff9a' }); }
+    else { invDrink++; floatTexts.push({ x: ball.x, y: ball.y - 26, t: 0, txt: '+1 BEBIDA', col: '#7fd8ff' }); }
+    playClick(); drawInv();
+  } else if (m.t === 'fx') {
+    if (m.src === NET.me) return;                       // la mía ya la vi
+    if (m.k === 'b') { booms.push({ x: m.x, y: m.y, t: 0, stun: !!m.s, R: m.R }); playBoom(); }
+    else if (m.k === 's') sonics.push({ x: m.x, y: m.y, t: 0, R: m.R, col: m.col === 'p' ? '255,225,120' : '160,230,255' });
+  } else if (m.t === 'win') { if (!storyOn) bossEnding(); }
+  else if (m.t === 'over') netTeamOver();
+}
+// invitado: copia lo que mandó el anfitrión
+function netApplySnap(m) {
+  if (typeof m.w === 'number' && m.w !== wave) { wave = m.w; waveEl.classList.remove('pop'); void waveEl.offsetWidth; waveEl.classList.add('pop'); }
+  if (typeof m.k === 'number') killed = m.k;
+  drawWave();
+  const seen = new Set();
+  for (const a of m.en || []) {
+    const [id, x, y, f, sk, hp, left, st, para, fl, jump, bite, slam, heads] = a;
+    seen.add(id);
+    let e = NET.mirror.get(id);
+    if (!e) {
+      e = { id, x, y, ph: Math.random() * 6, flash: 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16) };
+      e.r = e.mini ? 5 : e.big ? 9 : e.boss ? 12 : e.spider ? 13 : 7;
+      NET.mirror.set(id, e); enemies.push(e);
+    }
+    e.tx = x; e.ty = y; e.skin = sk; e.hp = hp; e.left = !!left; e.stun = st ? 1 : 0; e.para = !!para; if (fl) e.flash = .1;
+    e.headOrder = heads || null;
+    e.jump = jump ? { t: jump[0], tx: jump[1], ty: jump[2] } : null;
+    e.bite = bite ? { i: bite[0], t: bite[1], dx: bite[2], dy: bite[3], left: !!bite[4] } : null;
+    e.slam = slam ? { t: slam[0] } : null;
+  }
+  for (const [id, e] of NET.mirror) if (!seen.has(id)) { stopSound(e); NET.mirror.delete(id); const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); }
+  for (const p of m.pl || []) {
+    const [id, x, y, c, sk, d, lt] = p;
+    if (id === NET.me) continue;
+    let o = NET.others.get(id);
+    if (!o) { o = { id, x, y, dx: x, dy: y, tag: 'J' + (NET.others.size + 2) }; NET.others.set(id, o); }
+    o.x = x; o.y = y; o.char = c; o.skin = sk; o.down = !!d; o.light = !!lt;
+  }
+  const inSnap = new Set((m.pl || []).map(p => p[0]));
+  for (const id of [...NET.others.keys()]) if (!inSnap.has(id)) NET.others.delete(id);   // se fue del grupo
+  const myIdx = (m.pl || []).findIndex(p => p[0] === NET.me);
+  NET.bul = (m.bl || []).filter(b => b[4] !== myIdx).map(b => ({ x: b[0], y: b[1], vx: b[2], vy: b[3] }));
+  crates.length = 0;
+  for (const c of m.cr || []) crates.push({ x: c[0], y: c[1], open: !!c[2], item: c[3] ? 'kit' : 'drink', flash: c[4] ? .1 : 0, t: performance.now() / 1000, hp: 3 });
+}
+// invitado: los enemigos no se simulan, solo se acercan suave a donde dijo el anfitrión
+function netClientEnemies(dt) {
+  const k = Math.min(1, dt * 12);
+  for (const e of enemies) {
+    if (e.tx === undefined) continue;
+    const mv = Math.hypot(e.tx - e.x, e.ty - e.y);
+    if (mv > 60) { e.x = e.tx; e.y = e.ty; } else { e.x += (e.tx - e.x) * k; e.y += (e.ty - e.y) * k; }
+    e.ph += dt * 8; e.flash = Math.max(0, e.flash - dt);
+    if (e.jump) e.jump.t += dt; if (e.bite) e.bite.t += dt; if (e.slam) e.slam.t += dt;
+  }
+  // mis balas desaparecen al tocar a un enemigo (el daño lo cuenta el anfitrión)
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    for (const e of enemies) {
+      if (e.jump) continue;
+      if (e.boss ? Math.hypot(b.x - e.x, b.y - (e.y - 20)) < 19 : e.spider ? Math.hypot(b.x - e.x, b.y - (e.y - 17)) < 18 : Math.hypot(b.x - e.x, b.y - (e.y - 8 * scaleOf(e))) < e.r + 4) { bullets.splice(i, 1); e.flash = .1; break; }
+    }
+  }
+  for (const b of NET.bul) { b.x += b.vx * dt; b.y += b.vy * dt; }
+  hurt = Math.max(0, hurt - dt);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .9; p.vy *= .9; p.life -= dt;
+    if (p.life <= 0) parts.splice(i, 1);
+  }
+}
+/* ----- caer en grupo: te quedas mirando hasta que caen todos ----- */
+function netGoDown() {
+  over = true; setNade(false); deadT = 0; hurt = 0; resetJoy();
+  showSkillBtns(false); document.getElementById('nade').style.display = 'none'; document.getElementById('joy').style.display = 'none';
+  const w = document.getElementById('mpWait'); w.textContent = '¡TE ATRAPARON! TUS COMPAÑEROS SIGUEN…'; w.style.display = 'block';
+  if (netClient()) netSend({ t: 'down' }); else netCheckOver();
+}
+function netCheckOver() {
+  if (!netHost() || !over) return;
+  for (const m of NET.mates.values()) if (!m.down) return;
+  netSend({ t: 'over' }); netTeamOver();
+}
+function netTeamOver() {
+  if (document.getElementById('over').style.display === 'flex' || rewarded) return;
+  document.getElementById('mpWait').style.display = 'none';
+  gameOver();
+}
+// luz azul de otros jugadores (en el suelo, debajo de los enemigos)
+function drawMateLights(cx, cy) {
+  if (!netOn()) return;
+  for (const m of (netHost() ? NET.mates : NET.others).values()) {
+    if (m.gone || m.down || !(m.light || m.lightT > 0)) continue;
+    g.fillStyle = 'rgba(80,170,255,.2)'; g.beginPath(); g.ellipse(Math.round(m.dx - cx), Math.round(m.dy - cy), LIGHT_R, LIGHT_R * .6, 0, -Math.PI / 4, Math.PI * 5 / 4); g.fill();
+  }
+}
+// dibuja a los demás jugadores del grupo con su personaje y su skin
+function drawMates(cx, cy) {
+  if (!netOn()) return;
+  const list = [...(netHost() ? NET.mates : NET.others).values()].sort((a, b) => a.dy - b.dy);
+  for (const m of list) {
+    if (m.gone) continue;
+    const src = charImg(CHARS.some(c => c.id === m.char) ? m.char : 'cam', typeof m.skin === 'string' ? m.skin : null); if (!src) continue;
+    const px = Math.round(m.dx - cx), py = Math.round(m.dy - cy), w = HH * aspect(src);
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(px, py + 4, 7, 3, 0, 0, 7); g.fill();
+    g.save(); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    if (m.down) { g.translate(px, py + 4); g.rotate(Math.PI / 2); g.globalAlpha = .75; blitChar(g, src, 0, 1, -HH, -w / 2 - 4, w, HH); }
+    else {
+      blitChar(g, src, 0, 1, px - 9 + (HW - w) / 2, py - 19, w, HH);
+      if (m.char !== 'tv') g.drawImage(GUN, px + 5.5, py - 5.2, GW, GH);
+    }
+    g.restore(); g.imageSmoothingEnabled = false;
+    g.font = 'bold 5px monospace'; g.textAlign = 'center';
+    g.fillStyle = '#000'; g.fillText(m.tag, px + .6, py - 22 + .6); g.fillStyle = m.down ? '#9aa4ab' : '#5ec8ff'; g.fillText(m.tag, px, py - 22);
+    g.textAlign = 'left';
+  }
+}
+// cada jugador empieza un poco al lado del otro
+function netSpread() {
+  if (!netOn()) return;
+  const ids = mpSorted().map(pid), i = Math.max(0, ids.indexOf(NET.me));
+  ball.x = (A0 + A1) / 2 + (i - (ids.length - 1) / 2) * 20;
+}
+// el anfitrión tocó EMPEZAR: todos parten la oleada 1 juntos
+let mpPlayedStart = 0;
+const mpSorted = () => mpGroup.peers().slice().sort((a, b) => ((b.presence && b.presence.host) ? 1 : 0) - ((a.presence && a.presence.host) ? 1 : 0) || ((a.presence || {}).t || 0) - ((b.presence || {}).t || 0));
+function mpPlayStart(stamp) {
+  if (!stamp || stamp === mpPlayedStart) return;
+  mpPlayedStart = stamp;
+  netStart();
+  mpScr.style.display = 'none';
+  startAtWave(1); netSpread();
 }
 document.getElementById('mpCreate').addEventListener('click', async () => {
   if (!(await mpConnect())) return;
@@ -3411,8 +3753,9 @@ document.getElementById('mpJoinBtn').addEventListener('click', () => {
 });
 document.getElementById('mpStart').addEventListener('click', async () => {
   if (!mpGroup || !mpIsHost) return;
-  await mpGroup.presence({ start: Date.now() });
-  document.getElementById('mpGroupMsg').textContent = '¡Listo! El juego en equipo llega en la próxima actualización.';
+  const stamp = Date.now();
+  await mpGroup.presence({ start: stamp });
+  mpPlayStart(stamp);
 });
 document.getElementById('mpBack').addEventListener('click', async () => {
   if (document.getElementById('mpJoin').style.display === 'flex') { mpShow('mpHome'); return; }
@@ -3815,7 +4158,8 @@ document.getElementById('dbgClose').addEventListener('click', () => { dbgPanel.s
 /* ----- botón MENU con confirmación ----- */
 const confirmEl = document.getElementById('confirm');
 document.getElementById('menuBtn').addEventListener('click', () => {
-  paused = true; resetJoy(); lastTap = null;
+  if (!netOn()) paused = true;                     // en grupo la partida no se detiene para los demás
+  resetJoy(); lastTap = null;
   if (actx) setTimeout(() => { if (paused) actx.suspend(); }, 150);   // deja sonar el clic antes de silenciar
   confirmEl.style.display = 'flex';
 });
@@ -3837,6 +4181,9 @@ document.getElementById('yesBtn').addEventListener('click', () => {
 document.getElementById('rwMenu').addEventListener('click', () => goMenu());
 function goMenu() {
   // vuelve al menú principal; la partida se reinicia
+  netStop();
+  if (mpGroup && mpScr.style.display === 'none') mpLeave();   // estabas jugando en grupo: sales del grupo
+  document.getElementById('mpWait').style.display = 'none';
   confirmEl.style.display = 'none'; paused = false; running = false;
   restart();
   if (actx) actx.resume();
