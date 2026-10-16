@@ -106,6 +106,7 @@
     pointer-events: none;
   }
   .wave.pop { animation: wavePop 1.2s ease-out; }
+  @media (max-aspect-ratio: 1/1) and (max-width: 600px) { .wave { top: 80px; } }   /* celular vertical: debajo del botón MENU */
   @keyframes wavePop {
     0% { transform: translateX(-50%) scale(1); }
     15% { transform: translateX(-50%) scale(1.8); color: #ff8a80; }
@@ -319,6 +320,12 @@
   .up-btn { flex: none; font-family: inherit; font-size: clamp(8px, 1.8vw, 11px); padding: 8px 10px; cursor: pointer; color: #fff;
     background: #2e86de; border: 3px solid #1b1b2f; box-shadow: 2px 2px 0 #000; }
   .up-btn.soon { background: #7f8c8d; }
+  .up-btn .coin { width: 10px; height: 10px; vertical-align: -1px; }
+  .up-btn.ask { background: #27ae60; } .up-btn.max { background: #b8860b; cursor: default; } .up-btn.nope { background: #c0392b; animation: nope .35s; }
+  .skill-opt .uptxt { color: #2e86de; font-size: .85em; }
+  /* nivel III: marco de oro (solo en el menú del personaje) */
+  .skin-opt.skill-opt.gold { background: linear-gradient(180deg, #fff6c8, #ffe07a); border-color: #8a6100; box-shadow: 0 0 0 3px #ffd700, 0 0 0 6px #b8860b, 3px 3px 0 6px #000; }
+  .skin-opt.skill-opt.gold canvas { outline: 3px solid #ffd700; outline-offset: 1px; }
   .lvls { display: inline-flex; gap: 4px; vertical-align: middle; margin-left: 6px; }
   .lv { min-width: 26px; padding: 2px 4px; text-align: center; font-size: .85em; color: #9aa4ab; background: #e3e6e8; border: 2px solid #9aa4ab; }
   .lv.on { color: #1b1b2f; background: #ffd60a; border-color: #1b1b2f; box-shadow: 1px 1px 0 #000; }
@@ -391,7 +398,11 @@
   .story { --ph: min(46vh, 70vw); position: fixed; inset: 0; display: none; z-index: 40; pointer-events: none; }
   .story canvas { position: absolute; inset: auto auto 2vh 1vw; height: var(--ph); width: calc(var(--ph) * .714); image-rendering: pixelated; z-index: 2; }
   /* el cuadro de diálogo empieza detrás del personaje y llega casi al otro lado */
-  .story-box { position: absolute; left: calc(var(--ph) * .3); right: 2vw; bottom: 3vh; height: calc(var(--ph) * .72); background: #fff; border: 5px solid #1b1b2f;
+  .story-next { position: absolute; right: 2.5vw; bottom: 1.2vh; display: none; font-family: 'Press Start 2P', monospace; font-size: clamp(9px, 1.9vh, 13px); color: #fff; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; animation: blinkNext 1s steps(2) infinite; }
+  @keyframes blinkNext { 50% { opacity: .35; } }
+  .mp-wait { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 30; display: none; padding: 12px 16px; max-width: 92vw; text-align: center; line-height: 1.6;
+    font-family: 'Press Start 2P', monospace; font-size: clamp(10px, 2.6vw, 16px); color: #ffe14d; background: rgba(27,27,47,.85); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; pointer-events: none; }
+  .story-box { position: absolute; left: calc(var(--ph) * .3); right: 2vw; bottom: calc(2vh + 22px); height: calc(var(--ph) * .72); background: #fff; border: 5px solid #1b1b2f;
     box-shadow: 5px 5px 0 #000; padding: calc(var(--ph) * .16) 3vw 2vh calc(var(--ph) * .5); font-family: 'Press Start 2P', monospace; }
   .story-name { position: absolute; left: calc(var(--ph) * .5); top: calc(var(--ph) * .04); color: #5ec8ff; font-size: clamp(10px, 2.6vh, 18px); text-shadow: 2px 2px 0 #1b1b2f, -1px -1px 0 #1b1b2f; }
   .story-text { color: #111; font-size: clamp(10px, 2.8vh, 20px); line-height: 1.7; }
@@ -401,8 +412,19 @@
     .story-name { font-size: 10px; }
     .story-text { font-size: 12px; }
   }
-  .mp-wait { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 30; display: none; padding: 12px 16px; max-width: 92vw; text-align: center; line-height: 1.6;
-    font-family: 'Press Start 2P', monospace; font-size: clamp(10px, 2.6vw, 16px); color: #ffe14d; background: rgba(27,27,47,.85); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; pointer-events: none; }
+  .name-scr { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 12, 20, .7); }
+  .name-box { background: #1b1b2f; border: 5px solid #ffe14d; box-shadow: 6px 6px 0 #000; padding: 24px 22px; width: min(440px, 92vw); display: flex; flex-direction: column; gap: 18px; align-items: center;
+    font-family: 'Press Start 2P', monospace; color: #fff; text-align: center; }
+  .name-box label { font-size: clamp(11px, 3vw, 16px); line-height: 1.6; color: #ffe14d; text-shadow: 2px 2px 0 #000; }
+  .name-box input { width: 100%; font-family: inherit; font-size: 16px; padding: 12px; text-align: center; color: #1b1b2f; background: #fff; border: 4px solid #000; outline: none; text-transform: uppercase; }
+  .name-box input:focus { border-color: #2e86de; }
+  .name-box .err { min-height: 1em; font-size: 10px; color: #ff6b5e; }
+  .upd-scr { position: fixed; inset: 0; z-index: 79; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 12, 20, .7); }
+  .upd-box { background: #1b1b2f; border: 5px solid #27ae60; box-shadow: 6px 6px 0 #000; padding: 24px 22px; width: min(440px, 92vw); display: flex; flex-direction: column; gap: 18px; align-items: center;
+    font-family: 'Press Start 2P', monospace; color: #fff; text-align: center; font-size: clamp(11px, 3vw, 16px); line-height: 1.7; }
+  .upd-box b { color: #ffe14d; font-weight: normal; }
+  .upd-bar { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 85; display: none; max-width: 94vw; padding: 10px 14px; cursor: pointer;
+    font-family: 'Press Start 2P', monospace; font-size: clamp(9px, 2.4vw, 13px); line-height: 1.6; text-align: center; color: #1b1b2f; background: #ffe14d; border: 3px solid #1b1b2f; box-shadow: 4px 4px 0 #000; }
   .fade-black { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 45; transition: opacity 2.5s ease-in; display: none; }
   .rewards { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .rw-box { background: #1b1b2f; border: 5px solid #ffe14d; box-shadow: 6px 6px 0 #000; padding: 26px 28px; display: flex; flex-direction: column; gap: 16px; align-items: center;
@@ -538,7 +560,7 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.02</div>
+  <div class="ver">VERSIÓN 1.1</div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -605,8 +627,21 @@
 <div class="story" id="story">
   <canvas id="storyChar" width="300" height="420"></canvas>
   <div class="story-box"><div class="story-name">JEFE CIENTÍFICO CAMARAMAN</div><div class="story-text" id="storyText"></div></div>
+  <div class="story-next" id="storyNext">PRESIONA PARA AVANZAR ▶</div>
 </div>
-<div class="mp-wait" id="mpWait"></div>
+<div class="mp-wait" id="mpWait">ESPERANDO A LOS DEMÁS JUGADORES…</div>
+<!-- aviso: el juego se actualizó -->
+<div class="upd-scr" id="updScr"><div class="upd-box"><div>¡EL JUEGO SE ACTUALIZÓ!<br><b id="updVer"></b></div><button class="play" id="updOk">OK</button></div></div>
+<button class="upd-bar" id="updBar">¡HAY UNA ACTUALIZACIÓN! TOCA AQUÍ PARA RECARGAR</button>
+<!-- la primera vez que se abre el juego: nombre de usuario -->
+<div class="name-scr" id="nameScr">
+  <form class="name-box" id="nameForm" autocomplete="off">
+    <label for="nameIn">Escribe tu nombre de usuario:</label>
+    <input id="nameIn" maxlength="12" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+    <div class="err" id="nameErr"></div>
+    <button class="play" type="submit">ACEPTAR</button>
+  </form>
+</div>
 <div class="fade-black" id="fadeBlack"></div>
 <div class="rewards" id="rewards">
   <div class="rw-box">
@@ -1212,10 +1247,10 @@ const JACKETS = [
 ];
 // monedas y skins compradas (guardadas en el dispositivo)
 let coins = 0, owned = ['negra'];          // las skins gratis (que no son predeterminadas) también hay que comprarlas
-try {   // versión 1.02: todas las cuentas empiezan de cero (una sola vez en cada dispositivo)
-  if (!localStorage.getItem('skibidi_reset102')) {
-    for (const k of ['skibidi_coins', 'skibidi_owned', 'skibidi_jacket', 'skibidi_char', 'skibidi_spkskin', 'skibidi_tvskin', 'skibidi_skilllv', 'skibidi_gift1000']) localStorage.removeItem(k);
-    localStorage.setItem('skibidi_reset1', '1'); localStorage.setItem('skibidi_mig_free', '1'); localStorage.setItem('skibidi_reset102', '1');
+try {   // versión 1.1: todas las cuentas empiezan de cero (una sola vez en cada dispositivo)
+  if (!localStorage.getItem('skibidi_reset11c')) {
+    for (const k of ['skibidi_coins', 'skibidi_owned', 'skibidi_jacket', 'skibidi_char', 'skibidi_spkskin', 'skibidi_tvskin', 'skibidi_skilllv', 'skibidi_gift1000', 'skibidi_name']) localStorage.removeItem(k);
+    localStorage.setItem('skibidi_reset1', '1'); localStorage.setItem('skibidi_mig_free', '1'); localStorage.setItem('skibidi_reset11c', '1');
   }
 } catch (err) {}
 try { if (!localStorage.getItem('skibidi_reset1')) { localStorage.setItem('skibidi_coins', '0'); localStorage.setItem('skibidi_reset1', '1'); }   // monedas reiniciadas a 0 (una vez)
@@ -1808,7 +1843,7 @@ function useInvDrink() {                         // bebida: velocidad 85 por 3 s
   burst(ball.x, ball.y - 8, 12, ['#7fd8ff', '#2e86de', '#ffffff']); drawInv();
 }
 function updateCrates(dt) {
-  if (!netClient()) for (let i = pendingCrates.length - 1; i >= 0; i--) { pendingCrates[i] -= dt; if (pendingCrates[i] <= 0) { pendingCrates.splice(i, 1); spawnCrate(); } }
+  if (!holdSpawn && !netClient()) for (let i = pendingCrates.length - 1; i >= 0; i--) { pendingCrates[i] -= dt; if (pendingCrates[i] <= 0) { pendingCrates.splice(i, 1); spawnCrate(); } }
   if (drinkT > 0) { drinkT = Math.max(0, drinkT - dt); if (drinkT === 0) drawInv(); }
   for (let i = crates.length - 1; i >= 0; i--) {
     const c = crates[i]; c.t += dt; c.flash = Math.max(0, c.flash - dt);
@@ -2214,6 +2249,60 @@ function killEnemy(e, dir) {
 }
 /* ----- al completar la oleada 15: habla el Jefe Científico Camaraman, la pantalla se pone negra y salen las recompensas ----- */
 const WIN_BONUS = 280;
+// ----- el Jefe Científico Camaraman habla (retrato grande + texto que se escribe letra por letra) -----
+// se cierra solo un rato después de terminar de escribir, o tocando la pantalla
+const BOSS_HELLO = 'Mantén la calma, estamos preparando un equipo que irá por ti. Aguanta un poco.';
+let holdSpawn = false, mpWaiting = false;
+// el jefe habla; al terminar de escribirse sale "PRESIONA PARA AVANZAR" y se cierra solo al tocar
+function bossSays(msg, done) {
+  const cv = document.getElementById('storyChar'), c = cv.getContext('2d'), src = heroSkins.cientifico || heroImg();
+  c.clearRect(0, 0, cv.width, cv.height);
+  if (src) { const k = Math.min(cv.width / src.width, cv.height / src.height); c.imageSmoothingEnabled = false; c.drawImage(src, (cv.width - src.width * k) / 2, cv.height - src.height * k, src.width * k, src.height * k); }
+  const story = document.getElementById('story'), el = document.getElementById('storyText'), next = document.getElementById('storyNext');
+  story.style.display = 'block'; el.textContent = ''; next.style.display = 'none';
+  let i = 0, finished = false;
+  const close = () => {
+    if (finished) return; finished = true;
+    clearInterval(type); removeEventListener('pointerdown', tap, true);
+    story.style.display = 'none'; next.style.display = 'none'; if (done) done();
+  };
+  const tap = e => {
+    e.stopPropagation(); e.preventDefault();
+    if (i < msg.length) { i = msg.length; el.textContent = msg; clearInterval(type); next.style.display = 'block'; }   // termina de escribir de una
+    else { playClick(); close(); }
+  };
+  const type = setInterval(() => {
+    el.textContent = msg.slice(0, ++i);
+    if (i % 2 && msg[i - 1] !== ' ') playClick();
+    if (i >= msg.length) { clearInterval(type); next.style.display = 'block'; }
+  }, 55);
+  setTimeout(() => { if (!finished) addEventListener('pointerdown', tap, true); }, 300);
+}
+// al empezar el capítulo 1 (después de la historia): 1.5 s quietos, habla el jefe y la oleada parte al presionar
+function chapterHello(mp) {
+  paused = true; holdSpawn = true; resetJoy(); lastTap = null;
+  for (const id of ['joy', 'menuBtn', 'hint']) document.getElementById(id).style.display = 'none';
+  showSkillBtns(false); document.getElementById('nade').style.display = 'none';
+  setTimeout(() => bossSays(BOSS_HELLO, () => {
+    paused = false;                                   // ya te puedes mover
+    document.getElementById('joy').style.display = 'flex'; document.getElementById('menuBtn').style.display = 'block';
+    document.getElementById('nade').style.display = 'flex'; showSkillBtns(true);
+    const hint = document.getElementById('hint'); hint.style.opacity = 1; hint.style.display = 'block'; setTimeout(() => hint.style.opacity = 0, 4000);
+    if (mp && mpGroup) {                              // multijugador: esperar a que todos presionen
+      mpWaiting = true; document.getElementById('mpWait').textContent = 'ESPERANDO A LOS DEMÁS JUGADORES…'; document.getElementById('mpWait').style.display = 'block';
+      mpGroup.presence({ ready: mpPlayedStart }); mpCheckReady();
+    } else releaseWave();
+  }), 1500);
+}
+function releaseWave() {
+  holdSpawn = false; mpWaiting = false; spawnT = 2;      // parte la oleada: el primer enemigo sale en 2 s
+  document.getElementById('mpWait').style.display = 'none';
+}
+function mpCheckReady() {
+  if (!mpWaiting || !mpGroup) return;
+  const all = mpSorted().every(p => p.presence && (p.presence.ready === mpPlayedStart || p.presence.late === mpPlayedStart));
+  if (all) releaseWave();
+}
 function bossEnding() {
   if (storyOn) return;
   storyOn = true; setNade(false);
@@ -2293,10 +2382,10 @@ nadeBtn.addEventListener('click', e => e.preventDefault());
 function throwGrenade(tx, ty) {
   tx = Math.max(MIN, Math.min(MAX, tx)); ty = Math.max(MIN, Math.min(MAX, ty));
   const sx = ball.x + 6, sy = ball.y - 6, d = Math.hypot(tx - sx, ty - sy);
-  grenades.push({ sx, sy, tx, ty, t: 0, T: Math.min(.9, .3 + d / 260), stun: hasSkill('bomba') });
-  netLocal('nade', { sx: r1(sx), sy: r1(sy), tx: r1(tx), ty: r1(ty), stun: hasSkill('bomba'), lv: 0 });
+  grenades.push({ sx, sy, tx, ty, t: 0, T: Math.min(.9, .3 + d / 260), stun: hasSkill('bomba'), lv: skillLv('bomba') });
+  netLocal('nade', { sx: r1(sx), sy: r1(sy), tx: r1(tx), ty: r1(ty), stun: hasSkill('bomba'), lv: skillLv('bomba') });
   setNade(false);
-  nadeCd = NADE_RELOAD; drawNadeCd();          // empieza la recarga de 30 s
+  nadeCd = NADE_RELOAD - (charSel === 'cam' ? 5 * skillLv('granada') : 0); drawNadeCd();          // empieza la recarga de 30 s
 }
 // daño de granada a un enemigo (extra: daño adicional por mejoras)
 function blastEnemy(e, fromX, extra = 0) {
@@ -2308,8 +2397,9 @@ function blastEnemy(e, fromX, extra = 0) {
 }
 const isBossy = e => e.boss || e.spider;          // los que no se marean
 function explode(x, y, stun, lv, src) {
+  if (lv === undefined) lv = skillLv('bomba');
   if (stun) {                                     // BOMBA ATURDIDORA: explosión blanca que marea
-    const R = BOOM_R + 14 * (skillLv('bomba') - 1), T = STUN_T + (skillLv('bomba') - 1);
+    const R = BOOM_R + 14 * lv, T = STUN_T + lv;
     booms.push({ x, y, t: 0, stun: true, R }); netFx({ k: 'b', x: r1(x), y: r1(y), s: 1, R }, src);
     for (const e of enemies) {
       if (e.jump || isBossy(e) || Math.hypot(e.x - x, (e.y - 6) - y) > R + e.r) continue;
@@ -2361,8 +2451,17 @@ const SKILLS = {
 };
 const BOOST_T = 3, BOOST_RELOAD = 30, BOOST_MULT = 1.7, KITS = 3;
 let boostT = 0, boostCd = 0, kits = KITS;
+// nivel de cada habilidad: 0 = sin mejorar, I, II, III (se compran en el menú del personaje)
+const UP_PRICES = [80, 180, 280];
+const UP_TXT = {                                  // qué mejora cada nivel
+  granada: 'SE RECARGA 5 S MÁS RÁPIDO.', impulso: 'CORRES 1 S MÁS.', botiquin: '+1 BOTIQUÍN POR PARTIDA.',
+  bomba: 'EXPLOSIÓN MÁS GRANDE Y +1 S MAREADOS.', onda: 'HACE MÁS DAÑO.', empuje: 'LOS LANZA MÁS LEJOS.',
+  luz: 'DURA 2 S MÁS.', cuchilla: '+1 GOLPE.', tele: 'APARECES 1 S ANTES.',
+};
 let skillLvs = {};
-const skillLv = id => 1;                         // nivel de cada habilidad (por ahora todas en I)
+try { skillLvs = JSON.parse(localStorage.getItem('skibidi_skilllv') || '{}') || {}; } catch (err) { skillLvs = {}; }
+const skillLv = id => Math.max(0, Math.min(3, skillLvs[id] | 0));
+function saveSkillLvs() { try { localStorage.setItem('skibidi_skilllv', JSON.stringify(skillLvs)); } catch (err) {} }
 const STUN_T = 3, SONIC_RELOAD = 30, ENEMY_W = 14;   // ENEMY_W: "un enemigo" de distancia
 let waveCd = 0, pushCd = 0;
 const sonics = [];                               // ondas que se ven al usar las habilidades del parlante
@@ -2377,9 +2476,9 @@ function sonicSound(push) {
   o.connect(gn); gn.connect(sfx || actx.destination); o.start(t); o.stop(t + .55);
 }
 function sonicWave() {                           // ONDA SÓNICA: daño de granada a unos 2 enemigos de distancia
-  const R = ENEMY_W * 2 + 4, extra = skillLv('onda') - 1;
+  const R = ENEMY_W * 2 + 4, extra = skillLv('onda');
   sonics.push({ x: ball.x, y: ball.y - 6, t: 0, R, col: '160,230,255' });
-  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R, col: 'o' }); netLocal('sonic', { p: 0, lv: 0 });
+  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R, col: 'o' }); netLocal('sonic', { p: 0, lv: skillLv('onda') });
   for (const e of enemies.slice()) {
     if (e.jump || atBack(e) || Math.hypot(e.x - ball.x, e.y - ball.y) > R + e.r) continue;
     blastEnemy(e, ball.x, extra);
@@ -2387,9 +2486,9 @@ function sonicWave() {                           // ONDA SÓNICA: daño de grana
   sonicSound(false);
 }
 function sonicPush() {                           // EMPUJE SÓNICO: los lanza lejos (3 enemigos; los pesados 2)
-  const R = ENEMY_W * 2 + 6, up = skillLv('empuje') - 1;
+  const R = ENEMY_W * 2 + 6, up = skillLv('empuje');
   sonics.push({ x: ball.x, y: ball.y - 6, t: 0, R: R + 10, col: '255,225,120' });
-  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R: R + 10, col: 'p' }); netLocal('sonic', { p: 1, lv: 0 });
+  netFx({ k: 's', x: r1(ball.x), y: r1(ball.y - 6), R: R + 10, col: 'p' }); netLocal('sonic', { p: 1, lv: skillLv('empuje') });
   for (const e of enemies) {
     if (e.jump || atBack(e)) continue;
     const dx = e.x - ball.x, dy = e.y - ball.y, d = Math.hypot(dx, dy) || 1;
@@ -2451,7 +2550,7 @@ function startTeleport(wx, wy) {
     if (!found) return;
     [x, y] = found;
   }
-  teleTo = { x, y }; teleT = Math.max(.5, TELE_T - (skillLv('tele') - 1)); teleCd = TELE_RELOAD;
+  teleTo = { x, y }; teleT = Math.max(.5, TELE_T - skillLv('tele')); teleCd = TELE_RELOAD;
   setTele(false); drawSkills();
 }
 function puff(x, y, n, dark) {                     // humo negro
@@ -2514,7 +2613,7 @@ function drawTvFx(cx, cy) {                       // golpes de cuchilla, cuchill
     g.fillStyle = '#dfe6ea'; g.fillRect(x, y - 6, 1, 7); g.fillStyle = '#9aa4ab'; g.fillRect(x + 1, y - 5, 1, 5);
   }
   if (teleTo && !over) {
-    const x = teleTo.x - cx, y = teleTo.y - cy, k = 1 - teleT / Math.max(.5, TELE_T - (skillLv('tele') - 1));
+    const x = teleTo.x - cx, y = teleTo.y - cy, k = 1 - teleT / Math.max(.5, TELE_T - skillLv('tele'));
     g.strokeStyle = 'rgba(20,20,25,.8)'; g.lineWidth = 1.5;
     g.beginPath(); g.ellipse(x, y + 2, 7 + 3 * Math.sin(t * 10), 3, 0, 0, 7); g.stroke();
     g.fillStyle = 'rgba(0,0,0,' + (.15 + .35 * k) + ')'; g.beginPath(); g.ellipse(x, y + 2, 7, 3, 0, 0, 7); g.fill();
@@ -2618,7 +2717,7 @@ function showSkillBtns(on) {
   // el parlante usa la bomba aturdidora en el botón de la granada
   document.getElementById('nadeImg').src = hasSkill('bomba') && stunNadeURL ? stunNadeURL : NADE_SRC;
 }
-function resetSkills() { boostT = 0; boostCd = 0; kits = KITS; waveCd = 0; pushCd = 0; sonics.length = 0;
+function resetSkills() { boostT = 0; boostCd = 0; kits = KITS + skillLv('botiquin'); waveCd = 0; pushCd = 0; sonics.length = 0;
   lightT = 0; lightCd = 0; bladeUses = 0; bladeCd = 0; teleT = 0; teleCd = 0; teleTo = null; slashes.length = 0; if (typeof teleBtn !== 'undefined') setTele(false); drawSkills(); }
 const skillPress = (btn, fn) => {
   btn.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (!over && !paused) fn(); });
@@ -2626,7 +2725,7 @@ const skillPress = (btn, fn) => {
 };
 skillPress(boostBtn, () => {
   if (boostT > 0 || boostCd > 0) return;          // activo o recargando
-  playClick(); boostT = BOOST_T; boostCd = BOOST_RELOAD; drawSkills();
+  playClick(); boostT = BOOST_T + skillLv('impulso'); boostCd = BOOST_RELOAD; drawSkills();
 });
 skillPress(kitBtn, () => {
   if (kits <= 0) return;                          // ya no quedan
@@ -2644,8 +2743,8 @@ skillPress(kitBtn, () => {
 }
 skillPress(waveBtn, () => { if (waveCd > 0) return; playClick(); sonicWave(); waveCd = SONIC_RELOAD; drawSkills(); });
 skillPress(pushBtn, () => { if (pushCd > 0) return; playClick(); sonicPush(); pushCd = SONIC_RELOAD; drawSkills(); });
-skillPress(lightBtn, () => { if (lightT > 0 || lightCd > 0) return; playClick(); lightT = LIGHT_T + 2 * (skillLv('luz') - 1); lightCd = SONIC_RELOAD; drawSkills(); netLocal('light', { d: lightT }); });
-skillPress(bladeBtn, () => { if (bladeUses > 0 || bladeCd > 0) return; playClick(); bladeUses = BLADE_USES + (skillLv('cuchilla') - 1); drawSkills(); });
+skillPress(lightBtn, () => { if (lightT > 0 || lightCd > 0) return; playClick(); lightT = LIGHT_T + 2 * skillLv('luz'); lightCd = SONIC_RELOAD; drawSkills(); netLocal('light', { d: lightT }); });
+skillPress(bladeBtn, () => { if (bladeUses > 0 || bladeCd > 0) return; playClick(); bladeUses = BLADE_USES + skillLv('cuchilla'); drawSkills(); });
 skillPress(teleBtn, () => { if (teleT > 0 || teleCd > 0) return; playClick(); setTele(!teleSel); });
 function updateSkills(dt) {
   updateSonics(dt); updateTvSkills(dt);
@@ -2902,8 +3001,8 @@ function updateEnemies(dt) {
   if (netClient()) { netClientEnemies(dt); return; }   // en grupo, el invitado solo copia lo que manda el anfitrión
   flowT -= dt;
   if (flowT <= 0) { buildFlow(); flowT = .2; }
-  spawnT -= dt;
-  if (spawnT <= 0) {
+  if (!holdSpawn) spawnT -= dt;               // antes de que empiece la oleada no aparecen enemigos
+  if (spawnT <= 0 && !holdSpawn) {
     spawnEnemy();
     spawnT = Math.max(.9, 2.6 - elapsed / 25);        // cada vez aparecen más seguido
   }
@@ -3021,7 +3120,7 @@ function restart() {
   grenades.length = 0; booms.length = 0; smokes.length = 0; shocks.length = 0; setNade(false); nadeCd = 0; drawNadeCd(); resetSkills();
   enemies.length = 0; parts.length = 0; bullets.length = 0; corpses.length = 0;
   lives = MAX_LIVES; score = 0; hurt = 0; spawnT = 1.5; elapsed = 0; reload = 0; over = false;
-  clearTimeout(overTimer); runCoins = 0; storyOn = false; rewarded = false; document.getElementById('mpWait').style.display = 'none';
+  clearTimeout(overTimer); runCoins = 0; storyOn = false; rewarded = false; holdSpawn = false; mpWaiting = false; document.getElementById('mpWait').style.display = 'none';
   crates.length = 0; floatTexts.length = 0; pendingCrates = []; cratePlan = {}; drinkT = 0; invKit = 0; invDrink = 0; drawInv();
   for (const id of ['story', 'rewards']) document.getElementById(id).style.display = 'none';
   const fb = document.getElementById('fadeBlack'); fb.style.transition = 'none'; fb.style.opacity = '0'; fb.style.display = 'none'; void fb.offsetWidth; fb.style.transition = '';
@@ -3361,7 +3460,7 @@ function openMp() {
   });
 }
 function mpMyPresence(extra) {
-  return Object.assign({ char: charSel, skin: curSkin(charSel), host: mpIsHost, t: Date.now() }, extra || {});
+  return Object.assign({ char: charSel, skin: curSkin(charSel), host: mpIsHost, t: Date.now(), name: userName }, extra || {});
 }
 async function mpEnter(code, asHost) {
   const msg = document.getElementById(asHost ? 'mpGroupMsg' : 'mpJoinMsg');
@@ -3379,8 +3478,8 @@ async function mpEnter(code, asHost) {
     if (!others.some(p => p.presence && p.presence.host)) { msg.textContent = 'No existe un grupo con ese código.'; await mpLeave(); return false; }
     if (others.length >= MP_MAX) { msg.textContent = 'Ese grupo está lleno (máximo 4).'; await mpLeave(); return false; }
   }
-  if (!asHost) { const h = mpGroup.peers().find(p => p.presence && p.presence.host); mpPlayedStart = (h && h.presence.start) || 0; }   // si ya empezaron, no entras a esa partida
-  await mpGroup.presence(mpMyPresence());
+  if (!asHost) { const h = mpGroup.peers().find(p => p.presence && p.presence.host); mpPlayedStart = (h && h.presence.start) || 0; }   // si ya habían empezado, no se repite la historia
+  await mpGroup.presence(mpMyPresence(!asHost && mpPlayedStart ? { late: mpPlayedStart } : null));
   document.getElementById('mpCode').textContent = code;
   document.getElementById('mpGroupMsg').textContent = '';
   mpShow('mpGroup');
@@ -3393,20 +3492,31 @@ async function mpLeave() {
   if (mpGroup) { try { await mpGroup.leave(); } catch (err) {} }
   mpGroup = null; mpIsHost = false; mpHostSeen = false;
 }
+let mpPlayedStart = 0;                     // para ver la historia una sola vez por cada EMPEZAR
+const mpSorted = () => mpGroup.peers().slice().sort((a, b) => ((b.presence && b.presence.host) ? 1 : 0) - ((a.presence && a.presence.host) ? 1 : 0) || ((a.presence || {}).t || 0) - ((b.presence || {}).t || 0));
+// al empezar: todos ven la historia del capítulo 1 con los personajes y skins del grupo
+function mpPlayStart(stamp) {
+  if (!stamp || stamp === mpPlayedStart) return;
+  mpPlayedStart = stamp;
+  const team = mpSorted().map(p => ({ char: (p.presence || {}).char, skin: (p.presence || {}).skin }));
+  netStart();
+  playIntro(() => { mpScr.style.display = 'none'; startAtWave(1); netSpread(); chapterHello(true); }, team);
+}
 async function mpRender() {
   if (!mpGroup) return;
   const peers = mpGroup.peers().slice().sort((a, b) => ((b.presence && b.presence.host) ? 1 : 0) - ((a.presence && a.presence.host) ? 1 : 0) || (a.presence.t || 0) - (b.presence.t || 0));
   const host = peers.find(p => p.presence && p.presence.host);
   if (host) mpHostSeen = true;
+  mpCheckReady();
   if (netHost()) {                                    // alguien se fue en plena partida: cuenta como caído
     const ids = new Set(peers.map(pid));
     for (const m of NET.mates.values()) if (!ids.has(m.id) && !m.gone) { m.down = true; m.gone = true; }
     netCheckOver();
   }
   // el anfitrión se fue: el grupo se cierra
-  if (!mpIsHost && mpHostSeen && !host) { if (netClient() && running) netTeamOver(); await mpLeave(); mpShow('mpHome'); document.getElementById('mpNote').textContent = 'El anfitrión cerró el grupo.'; return; }
+  if (!mpIsHost && mpHostSeen && !host) { if (mpWaiting) releaseWave(); if (netClient() && running) netTeamOver(); await mpLeave(); mpShow('mpHome'); document.getElementById('mpNote').textContent = 'El anfitrión cerró el grupo.'; return; }
   // el anfitrión empezó la partida
-  if (!mpIsHost && host && host.presence.start) { document.getElementById('mpGroupMsg').textContent = 'La partida ya empezó. Espera a que termine.'; mpPlayStart(host.presence.start); }
+  if (!mpIsHost && host && host.presence.start) { document.getElementById('mpGroupMsg').textContent = '¡El anfitrión empezó!'; mpPlayStart(host.presence.start); }
   const ids = peers.map(p => p.by).filter(Boolean);
   const profs = mpUser && ids.length ? await mpUser.profiles(ids) : {};
   const box = document.getElementById('mpPlayers'); box.innerHTML = '';
@@ -3419,7 +3529,7 @@ async function mpRender() {
     if (p) {
       const pr = p.presence || {}, ch = CHARS.some(c => c.id === pr.char) ? pr.char : 'cam';
       drawBustOn(cv, charImg(ch, typeof pr.skin === 'string' ? pr.skin : null));
-      nm.textContent = p.sameTab ? 'TÚ' : ((p.by && profs[p.by] && profs[p.by].name) || 'JUGADOR ' + (i + 1));
+      nm.textContent = (cleanName(pr.name) || (p.by && profs[p.by] && profs[p.by].name) || 'JUGADOR ' + (i + 1)) + (p.sameTab ? ' (TÚ)' : '');
       tag.textContent = pr.host ? '★ ANFITRIÓN' : 'LISTO';
     } else {
       const c = cv.getContext('2d'); c.fillStyle = '#3a4046'; c.fillRect(0, 0, 120, 120); c.fillStyle = '#5d6b77'; c.font = '48px monospace'; c.textAlign = 'center'; c.fillText('?', 60, 76);
@@ -3466,7 +3576,7 @@ function netStart() {
     n++;
     if (p.sameTab) continue;
     const pr = p.presence || {}, id = pid(p);
-    const m = { id, x: ball.x, y: ball.y, dx: ball.x, dy: ball.y, char: pr.char, skin: pr.skin, down: false, hurt: 0, lightT: 0, tag: 'J' + (peers.indexOf(p) + 1) };
+    const m = { id, x: ball.x, y: ball.y, dx: ball.x, dy: ball.y, char: pr.char, skin: pr.skin, down: false, hurt: 0, lightT: 0, tag: cleanName(pr.name) || 'J' + (peers.indexOf(p) + 1) };
     if (netHost()) NET.mates.set(id, m); else NET.others.set(id, m);
   }
   NET.offMsg = netListen(netMsg);
@@ -3523,6 +3633,7 @@ let netClock = 0;
 function netTick(dt) {
   const now = performance.now(), real = Math.min(.1, (now - (netClock || now)) / 1000); netClock = now;
   if (!netOn()) return;
+  netReviveTick(dt);
   if (netHost()) {
     for (const m of NET.mates.values()) { m.hurt = Math.max(0, (m.hurt || 0) - dt); m.lightT = Math.max(0, (m.lightT || 0) - dt); }
     NET.snapT -= real;
@@ -3558,7 +3669,7 @@ function netMsg(from, m) {
     if (m.t === 'pos') {
       if (typeof m.x === 'number' && typeof m.y === 'number') { mt.x = Math.max(MIN, Math.min(MAX, m.x)); mt.y = Math.max(MIN, Math.min(MAX, m.y)); }
       if (CHARS.some(c => c.id === m.c)) mt.char = m.c; if (typeof m.s === 'string') mt.skin = m.s;
-      if (m.d && !mt.down) { mt.down = true; netCheckOver(); }
+      if (m.d && !mt.down && performance.now() - (mt.revAt || 0) > 2000) { mt.down = true; netCheckOver(); }   // (recién revivido: ignora avisos atrasados)
     } else if (m.t === 'shot') {
       if ([m.x, m.y, m.vx, m.vy].every(v => typeof v === 'number')) bullets.push({ x: m.x, y: m.y, vx: m.vx, vy: m.vy, life: 1, own: from });
     } else if (m.t === 'nade') {
@@ -3571,7 +3682,11 @@ function netMsg(from, m) {
       if (typeof m.wx === 'number' && typeof m.wy === 'number') netAs({ id: from, x: mt.x, y: mt.y }, null, () => bladeStrike(m.wx, m.wy, true));
     } else if (m.t === 'light') {
       mt.lightT = Math.max(0, Math.min(14, +m.d || 0));
-    } else if (m.t === 'down') { mt.down = true; netCheckOver(); }
+    } else if (m.t === 'down') { if (performance.now() - (mt.revAt || 0) > 2000) { mt.down = true; netCheckOver(); } }
+    else if (m.t === 'revive') {                       // un invitado revivió a alguien
+      if (m.id === NET.me) netRevived();
+      else { const tg = NET.mates.get(m.id); if (tg && tg.down && !tg.gone) { tg.down = false; tg.revAt = performance.now(); netSend({ t: 'revive' }, tg.id); } }
+    }
     return;
   }
   // invitado: solo escucha al anfitrión
@@ -3591,7 +3706,8 @@ function netMsg(from, m) {
     if (m.src === NET.me) return;                       // la mía ya la vi
     if (m.k === 'b') { booms.push({ x: m.x, y: m.y, t: 0, stun: !!m.s, R: m.R }); playBoom(); }
     else if (m.k === 's') sonics.push({ x: m.x, y: m.y, t: 0, R: m.R, col: m.col === 'p' ? '255,225,120' : '160,230,255' });
-  } else if (m.t === 'win') { if (!storyOn) bossEnding(); }
+  } else if (m.t === 'revive') netRevived();
+  else if (m.t === 'win') { if (!storyOn) bossEnding(); }
   else if (m.t === 'over') netTeamOver();
 }
 // invitado: copia lo que mandó el anfitrión
@@ -3659,8 +3775,41 @@ function netClientEnemies(dt) {
 function netGoDown() {
   over = true; setNade(false); deadT = 0; hurt = 0; resetJoy();
   showSkillBtns(false); document.getElementById('nade').style.display = 'none'; document.getElementById('joy').style.display = 'none';
-  const w = document.getElementById('mpWait'); w.textContent = '¡TE ATRAPARON! TUS COMPAÑEROS SIGUEN…'; w.style.display = 'block';
+  const w = document.getElementById('mpWait'); w.textContent = '¡TE ATRAPARON! UN COMPAÑERO TE PUEDE REVIVIR…'; w.style.display = 'block';
   if (netClient()) netSend({ t: 'down' }); else netCheckOver();
+}
+/* ----- revivir: quédate 5 s al lado de un compañero caído (con un botiquín de caja, al instante) ----- */
+const REVIVE_T = 5, REVIVE_R = 16;
+function netReviveTick(dt) {
+  if (!netOn() || over || paused) { NET.rev = null; return; }
+  let tgt = null, bd = 1e9;
+  for (const m of (netHost() ? NET.mates : NET.others).values()) {
+    if (!m.down || m.gone) continue;
+    const d = Math.hypot(m.x - ball.x, m.y - ball.y);
+    if (d < REVIVE_R && d < bd) { bd = d; tgt = m; }
+  }
+  if (!tgt) { NET.rev = null; return; }
+  if (invKit > 0) { invKit--; drawInv(); netDoRevive(tgt, true); NET.rev = null; return; }   // solo sirve el botiquín de las cajas
+  if (!NET.rev || NET.rev.id !== tgt.id) NET.rev = { id: tgt.id, t: 0 };
+  NET.rev.t += dt;
+  if (NET.rev.t >= REVIVE_T) { netDoRevive(tgt, false); NET.rev = null; }
+}
+function netDoRevive(m, kit) {
+  m.down = false; m.revAt = performance.now();
+  floatTexts.push({ x: m.x, y: m.y - 26, t: 0, txt: kit ? '¡REVIVIDO CON BOTIQUÍN!' : '¡REVIVIDO!', col: '#7dff9a' });
+  burst(m.x, m.y - 8, 14, ['#7dff9a', '#2ecc71', '#ffffff']); playClick();
+  if (netHost()) netSend({ t: 'revive' }, m.id); else netSend({ t: 'revive', id: m.id });
+}
+// me revivieron: vuelvo a jugar con 2 partes de vida
+function netRevived() {
+  if (!over || !netOn() || rewarded) return;
+  over = false; lives = 2; hurt = 1.5; deadT = 0; drawLives();
+  dmgEl.style.transition = 'opacity .4s'; dmgEl.style.opacity = '0';
+  document.getElementById('mpWait').style.display = 'none';
+  document.getElementById('joy').style.display = 'flex'; document.getElementById('menuBtn').style.display = 'block';
+  document.getElementById('nade').style.display = 'flex'; showSkillBtns(true); drawInv();
+  floatTexts.push({ x: ball.x, y: ball.y - 26, t: 0, txt: '¡TE REVIVIERON!', col: '#7dff9a' });
+  burst(ball.x, ball.y - 8, 14, ['#7dff9a', '#2ecc71', '#ffffff']); playClick();
 }
 function netCheckOver() {
   if (!netHost() || !over) return;
@@ -3696,6 +3845,10 @@ function drawMates(cx, cy) {
       if (m.char !== 'tv') g.drawImage(GUN, px + 5.5, py - 5.2, GW, GH);
     }
     g.restore(); g.imageSmoothingEnabled = false;
+    if (m.down && NET.rev && NET.rev.id === m.id) {   // barra de revivir
+      const k = Math.min(1, NET.rev.t / REVIVE_T);
+      g.fillStyle = '#000'; g.fillRect(px - 12, py - 32, 24, 4); g.fillStyle = '#2ecc71'; g.fillRect(px - 11, py - 31, 22 * k, 2);
+    }
     g.font = 'bold 5px monospace'; g.textAlign = 'center';
     g.fillStyle = '#000'; g.fillText(m.tag, px + .6, py - 22 + .6); g.fillStyle = m.down ? '#9aa4ab' : '#5ec8ff'; g.fillText(m.tag, px, py - 22);
     g.textAlign = 'left';
@@ -3706,16 +3859,6 @@ function netSpread() {
   if (!netOn()) return;
   const ids = mpSorted().map(pid), i = Math.max(0, ids.indexOf(NET.me));
   ball.x = (A0 + A1) / 2 + (i - (ids.length - 1) / 2) * 20;
-}
-// el anfitrión tocó EMPEZAR: todos parten la oleada 1 juntos
-let mpPlayedStart = 0;
-const mpSorted = () => mpGroup.peers().slice().sort((a, b) => ((b.presence && b.presence.host) ? 1 : 0) - ((a.presence && a.presence.host) ? 1 : 0) || ((a.presence || {}).t || 0) - ((b.presence || {}).t || 0));
-function mpPlayStart(stamp) {
-  if (!stamp || stamp === mpPlayedStart) return;
-  mpPlayedStart = stamp;
-  netStart();
-  mpScr.style.display = 'none';
-  startAtWave(1); netSpread();
 }
 document.getElementById('mpCreate').addEventListener('click', async () => {
   if (!(await mpConnect())) return;
@@ -3911,12 +4054,32 @@ function buildSkillList() {
     const b = document.createElement('div'); b.className = 'skin-opt skill-opt on';
     const cv = document.createElement('canvas'); cv.width = 32; cv.height = 32; drawSkillIcon(cv, s.id);
     const txt = document.createElement('div');
-    const lv = 1;                                  // nivel de la habilidad (por ahora todas en I)
+    const lv = skillLv(s.id);                      // 0 = sin mejorar, 1 = I, 2 = II, 3 = III
+    if (lv >= 3) b.classList.add('gold');          // nivel III: marco de oro
     const lvls = ['I', 'II', 'III'].map((r, i) => '<span class="lv' + (i < lv ? ' on' : '') + '">' + r + '</span>').join('');
-    txt.innerHTML = s.name + ' <span class="lvls">' + lvls + '</span><br><span class="desc">' + s.desc + '</span><br><small>EQUIPADA</small>';
+    txt.innerHTML = s.name + ' <span class="lvls">' + lvls + '</span><br><span class="desc">' + s.desc + '</span>' +
+      (UP_TXT[s.id] ? '<br><span class="uptxt">CADA NIVEL: ' + UP_TXT[s.id] + '</span>' : '') + '<br><small>EQUIPADA</small>';
     txt.style.flex = '1';
-    const up = document.createElement('button'); up.className = 'up-btn'; up.textContent = 'MEJORAR';
-    up.addEventListener('click', () => { up.textContent = 'PRONTO'; up.classList.add('soon'); setTimeout(() => { up.textContent = 'MEJORAR'; up.classList.remove('soon'); }, 1200); });   // todavía no hace nada
+    const up = document.createElement('button'); up.className = 'up-btn';
+    const price = UP_PRICES[lv], label = () => 'MEJORAR<br><span class="coin"></span> ' + price;
+    let ask = false, askT = 0;
+    if (lv >= 3) { up.innerHTML = 'MÁXIMO'; up.classList.add('max'); up.disabled = true; }
+    else up.innerHTML = label();
+    up.addEventListener('click', () => {
+      if (lv >= 3) return;
+      clearTimeout(askT);
+      if (coins < price) {                         // no te alcanza
+        up.classList.remove('ask', 'nope'); void up.offsetWidth; up.classList.add('nope'); up.innerHTML = 'FALTAN<br>MONEDAS'; ask = false;
+        askT = setTimeout(() => { up.classList.remove('nope'); up.innerHTML = label(); }, 1400); return;
+      }
+      if (!ask) {                                  // primer toque: confirma
+        ask = true; up.classList.add('ask'); up.innerHTML = '¿SEGURO?<br><span class="coin"></span> ' + price;
+        askT = setTimeout(() => { ask = false; up.classList.remove('ask'); up.innerHTML = label(); }, 2500); return;
+      }
+      coins -= price; saveShop(); drawCoins();     // segundo toque: compra el siguiente nivel
+      skillLvs[s.id] = lv + 1; saveSkillLvs();
+      buildSkillList();
+    });
     b.append(cv, txt, up); list.appendChild(b);
   }
 }
@@ -3947,14 +4110,15 @@ const chaptersEl = document.getElementById('chapters');
 document.getElementById('modeSolo').addEventListener('click', () => { hideModes(); chaptersEl.style.display = 'flex'; });
 document.getElementById('chaptersBack').addEventListener('click', () => { chaptersEl.style.display = 'none'; showModes(); });
 // el capítulo 1 siempre empieza desde la oleada 1
-document.getElementById('chap1').addEventListener('click', () => { chaptersEl.style.display = 'none'; playIntro(() => startAtWave(1)); });
+document.getElementById('chap1').addEventListener('click', () => { chaptersEl.style.display = 'none'; playIntro(() => { startAtWave(1); chapterHello(false); }); });
 
 /* ----- HISTORIA DEL INICIO: páginas que se pasan con la flecha (o SALTAR) ----- */
 const introEl = document.getElementById('intro'), introCv = document.getElementById('introCv');
 const INTRO_CAPS = ['', '', '', ''];          // páginas (sin texto)
-let introPage = 0, introT0 = 0, introAnim = 0, introDone = null, introFire = [];
-function playIntro(done) {
-  introDone = done; introPage = 0; introT0 = performance.now(); introFire = [];
+let introPage = 0, introT0 = 0, introAnim = 0, introDone = null, introFire = [], introTeam = null;
+// team: en multijugador, la lista de jugadores [{ char, skin }] (cada uno sale con su personaje y skin)
+function playIntro(done, team) {
+  introDone = done; introPage = 0; introT0 = performance.now(); introFire = []; introTeam = team && team.length ? team : null;
   introEl.style.display = 'block'; document.getElementById('menu').style.display = 'none';
   setIntroPage(0);
   cancelAnimationFrame(introAnim);
@@ -3967,7 +4131,7 @@ function setIntroPage(n) {
   document.getElementById('introDots').innerHTML = INTRO_CAPS.map((_, i) => '<i' + (i === n ? ' class="on"' : '') + '></i>').join('');
   document.getElementById('introNext').style.display = n < 3 ? 'block' : 'none';
   if (n === 2) { playBoom(); for (let i = 0; i < 40; i++) introFire.push(firePart(true)); }
-  if (n === 3) setTimeout(() => { if (introPage === 3 && introEl.style.display === 'block') endIntro(); }, 5100);   // se oscurece y empieza la oleada 1
+  if (n === 3) { const pg = introT0; setTimeout(() => { if (introPage === 3 && introT0 === pg && introEl.style.display === 'block') endIntro(); }, 5100); }   // se oscurece y empieza la oleada 1
 }
 function endIntro() {
   introEl.style.display = 'none'; cancelAnimationFrame(introAnim);
@@ -3980,6 +4144,7 @@ function firePart(big) {
   return { x: CAR_X + (Math.random() - .5) * (big ? 90 : 110), y: (big ? 188 : 172) - Math.random() * (big ? 30 : 20), vx: (Math.random() - .5) * (big ? 60 : 10), vy: -(big ? 30 + Math.random() * 60 : 25 + Math.random() * 35),
            t: 0, life: .5 + Math.random() * .8, r: (big ? 3 : 4) + Math.random() * 6, smoke: !big && Math.random() < .3 };
 }
+const introHeroes = () => introTeam ? introTeam.map(p => charImg(CHARS.some(c => c.id === p.char) ? p.char : 'cam', typeof p.skin === 'string' ? p.skin : null)).filter(Boolean) : [heroImg()].filter(Boolean);
 function drawIntro(t, now) {
   const dpr = Math.min(2, devicePixelRatio || 1), W = Math.round(innerWidth * dpr), H = Math.round(innerHeight * dpr);
   if (introCv.width !== W || introCv.height !== H) { introCv.width = W; introCv.height = H; }
@@ -4001,14 +4166,17 @@ function drawIntro(t, now) {
     for (let x = -400; x < 900; x += 30) P(((x + scroll * 1.6) % 1300 + 1300) % 1300 - 400, 182, 2, 12, '#5d686e');
     P(-400, 194, 1280, 2000, '#343f45');
     for (let x = -400; x < 900; x += 40) P(((x + scroll * 2) % 1300 + 1300) % 1300 - 400, 236, 22, 4, '#8a979c');
-    const me = heroImg();
-    if (me) {
-      c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
-      const h = 62, w = h * aspect(me), bob = Math.abs(Math.sin(t * 14)) * -4;
-      c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(240, 238, w * .45, 4, 0, 0, 7); c.fill();
-      c.save(); c.translate(240, 236 + bob); c.rotate(.1); c.scale(-1, 1); blitChar(c, me, 0, 1, -w / 2, -h, w, h); c.restore();
+    const team = introHeroes(), nT = team.length;
+    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+    // todos corren juntos: un poco separados y escalonados (los de atrás más arriba)
+    const order = team.map((src, i) => i).sort((a, b) => (a % 2) - (b % 2));
+    for (const i of order) {
+      const me = team[i], h = 62, w = h * aspect(me), bob = Math.abs(Math.sin(t * 14 + i * 1.3)) * -4;
+      const x = 240 + (i - (nT - 1) / 2) * 46, feet = 236 - (i % 2 ? 8 : 0);
+      c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(x, feet + 2, w * .45, 4, 0, 0, 7); c.fill();
+      c.save(); c.translate(x, feet + bob); c.rotate(.1); c.scale(-1, 1); blitChar(c, me, 0, 1, -w / 2, -h, w, h); c.restore();
       c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 1.5;                   // líneas de velocidad
-      for (let k2 = 0; k2 < 3; k2++) { const ly = 236 - h * (.3 + k2 * .22) + bob; c.beginPath(); c.moveTo(240 + w * .6, ly); c.lineTo(240 + w * .6 + 14 + k2 * 5, ly); c.stroke(); }
+      for (let k2 = 0; k2 < 3; k2++) { const ly = feet - h * (.3 + k2 * .22) + bob; c.beginPath(); c.moveTo(x + w * .6, ly); c.lineTo(x + w * .6 + 14 + k2 * 5, ly); c.stroke(); }
     }
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.fillStyle = 'rgba(0,0,0,' + Math.min(1, Math.max(0, t - 2) / 2.8) + ')'; c.fillRect(0, 0, W, H);   // 2 s corriendo y después se pone negro poco a poco
@@ -4075,17 +4243,23 @@ function drawIntro(t, now) {
   c.fillStyle = '#fff3a0'; c.beginPath(); c.moveTo(FX - 4, FY - 4); c.quadraticCurveTo(FX, FY - 14 - Math.sin(t * 9) * 2, FX + 4, FY - 4); c.fill();
   const glow = c.createRadialGradient(FX, FY - 8, 2, FX, FY - 8, 60); glow.addColorStop(0, 'rgba(255,170,60,.28)'); glow.addColorStop(1, 'rgba(255,170,60,0)');
   c.fillStyle = glow; c.fillRect(FX - 60, FY - 70, 120, 120);
-  const crew = heroSkins.negra, me = heroImg();
+  const crew = heroSkins.negra, team = introHeroes();
+  // los jugadores: en multijugador, uno al lado del otro a la derecha de la fogata (los de atrás un poco más arriba)
+  const teamAt = i => ({ x: FX + 115 + i * 36 - (team.length > 2 ? 10 : 0), feet: 236 - (i % 2 ? 8 : 0) });
+  const teamOrder = team.map((src, i) => i).sort((a, b) => (a % 2 ? 0 : 1) - (b % 2 ? 0 : 1));
   if (introPage <= 1) {
     person(crew, FX - 55, 224, 58, false, false, 0);
     person(crew, FX + 55, 224, 58, true, false, 1.7);
-    person(me, FX + 115, 236, 62, true, false, 3.1);
+    for (const i of teamOrder) { const q = teamAt(i); person(team[i], q.x, q.feet, 62, true, false, 3.1 + i); }
   } else {
     // los camarógrafos mueren; el jugador se va corriendo
     dead(crew, FX - 55, 224, 58, true, (t - .15) / .4);     // cae hacia la izquierda
     dead(crew, FX + 55, 224, 58, false, (t - .2) / .4);     // cae hacia la derecha
     // página 3: sale corriendo hacia la izquierda; página 4: sigue corriendo hasta irse mientras se oscurece
-    if (introPage === 2) person(me, ease(FX + 115, -120, t / 2.4), 236, 62, true, t < 2.4, 0);   // sale de la pantalla
+    if (introPage === 2) for (const i of teamOrder) {   // salen de la pantalla (cada uno arranca un poquito después)
+      const q = teamAt(i), u = (t - i * .15) / 2.4;
+      person(team[i], ease(q.x, -120 - i * 10, u), q.feet, 62, true, u > 0 && u < 1, i * 1.3);
+    }
     // el enemigo grande sale de la explosión
     enemy(introPage === 2 ? ease(CAR_X + 10, CAR_X + 90, t / .6) : CAR_X + 90, introPage === 2 ? ease(186, 236, t / .6) : 236, introPage === 2 ? ease(96, 100, t / .6) : 100, 0, false);
     const n = introPage === 2 ? Math.min(4, Math.floor(t / .7)) : 4;   // empiezan a llegar más enemigos normales
@@ -4193,6 +4367,51 @@ function goMenu() {
   document.getElementById('city').style.display = 'block';
   document.getElementById('menu').style.display = 'flex';
   const hint = document.getElementById('hint'); hint.style.opacity = 1;
+}
+/* ----- versión del juego y avisos de actualización ----- */
+// al subir una versión nueva a GitHub, se cambia este número
+const GAME_VERSION = '1.1';
+document.querySelector('.ver').textContent = 'VERSIÓN ' + GAME_VERSION;
+try {
+  const seen = localStorage.getItem('skibidi_seenver');
+  const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
+  // si ya habías jugado con otra versión: aviso al abrir
+  if (played && seen !== GAME_VERSION) {
+    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + GAME_VERSION;
+    document.getElementById('updScr').style.display = 'flex';
+  }
+  localStorage.setItem('skibidi_seenver', GAME_VERSION);
+} catch (err) {}
+document.getElementById('updOk').addEventListener('click', () => { document.getElementById('updScr').style.display = 'none'; });
+// mientras el juego está abierto: cada minuto revisa si en la página hay una versión más nueva
+if (/^https?:$/.test(location.protocol)) {
+  const checkUpdate = async () => {
+    try {
+      const r = await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const m = (await r.text()).match(/const GAME_VERSION = '([0-9.]+)'/);
+      if (m && m[1] !== GAME_VERSION) { document.getElementById('updBar').style.display = 'block'; clearInterval(updTimer); }
+    } catch (err) {}
+  };
+  const updTimer = setInterval(checkUpdate, 60000);
+}
+document.getElementById('updBar').addEventListener('click', () => location.reload());
+/* ----- nombre de usuario (se pide una sola vez y queda guardado en el dispositivo) ----- */
+const cleanName = v => String(v || '').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u206f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 12);
+let userName = '';
+try { userName = cleanName(localStorage.getItem('skibidi_name')); } catch (err) {}
+if (!userName) {
+  const scr = document.getElementById('nameScr'), inp = document.getElementById('nameIn');
+  scr.style.display = 'flex';
+  setTimeout(() => { try { inp.focus(); } catch (e) {} }, 300);
+  document.getElementById('nameForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = cleanName(inp.value);
+    if (v.length < 2) { document.getElementById('nameErr').textContent = 'Escribe al menos 2 letras'; return; }
+    userName = v;
+    try { localStorage.setItem('skibidi_name', v); } catch (err) {}
+    scr.style.display = 'none'; inp.blur();
+  });
 }
 </script>
 </body>
