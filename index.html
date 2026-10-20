@@ -636,7 +636,7 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.2.01</div>
+  <div class="ver">VERSIÓN 1.2.02</div>
   <div class="cd" id="cd"><span id="cdTit"></span><b id="cdTime"></b></div>
 </div>
 
@@ -4784,7 +4784,7 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.2.01';
+const GAME_VERSION = '1.2.02';
 const NEWS_VER = '1.2';                // 1.2.01 es un parche: el aviso sigue siendo el de la 1.2
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
@@ -4814,7 +4814,7 @@ try {
   const seen = localStorage.getItem('skibidi_seenver');
   const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
   // si ya habías jugado con otra versión: aviso al abrir
-  if (played && seen !== GAME_VERSION && seen !== NEWS_VER) {
+  if (played && !String(seen || '').startsWith(NEWS_VER)) {   // los parches 1.2.0x no repiten el aviso de la 1.2
     document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + NEWS_VER;
     document.getElementById('updNew').textContent = 'LA VERSIÓN ' + NEWS_VER + ' TRAE:';
     const ul = document.getElementById('updList');
