@@ -4799,7 +4799,7 @@ const NEWS = [
 ];
 document.querySelector('.ver').textContent = 'VERSIÓN ' + GAME_VERSION;
 /* ----- contador para la 1.3 (hora de Chile, UTC-3) ----- */
-const CD_FROM = Date.parse('2026-10-19T19:10:00-03:00'), CD_TO = Date.parse('2026-10-20T05:00:00-03:00');
+const CD_FROM = Date.parse('2026-10-19T19:10:00-03:00'), CD_TO = Date.parse('2026-10-20T15:00:00-03:00');
 function cdTick() {
   const now = Date.now(), el = document.getElementById('cd');
   if (now < CD_FROM) { el.style.display = 'none'; return; }
