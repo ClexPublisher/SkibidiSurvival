@@ -265,6 +265,11 @@
   .wbtn.bossw { background: #c0392b; }
   .wbtn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
   /* --- botones secundarios del menú --- */
+  .soon-big { position: absolute; left: 12px; bottom: 12px; max-width: min(46vw, 330px); padding: 10px 14px; font-family: 'Press Start 2P', monospace; font-size: clamp(8px, 2.2vw, 12px); line-height: 1.7;
+    color: #ffe14d; text-align: left; background: rgba(27, 27, 47, .88); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; text-shadow: 2px 2px 0 #000; pointer-events: none; animation: soonPulse 1.6s ease-in-out infinite; }
+  .soon-big span, .soon-big small { display: block; }
+  .soon-big small { margin-top: 6px; font-size: .75em; color: #c8d3dc; }
+  @keyframes soonPulse { 50% { border-color: #ff8a1c; } }
   .ver { position: absolute; right: 12px; bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   .menu-btns { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
   .sub {
@@ -761,7 +766,8 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.4</div>
+  <div class="ver">VERSIÓN 1.4.01</div>
+  <div class="soon-big"><span>LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…</span><small>BUENO, NO TAN CERCA…</small></div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -982,7 +988,7 @@ const EN = {
   '¡EL JUEGO SE ACTUALIZÓ!': 'THE GAME WAS UPDATED!', '¡HAY UNA ACTUALIZACIÓN! TOCA AQUÍ PARA RECARGAR': 'UPDATE AVAILABLE! TAP HERE TO RELOAD',
   'Mantén la calma, estamos preparando un equipo que irá por ti. Aguanta un poco.': 'Stay calm, we are getting a team ready to come for you. Hold on a little longer.',
   '¡Bien! Lo hiciste bien, estamos llegando por ti…': 'Great! You did well, we are coming for you…',
-  'NOVEDADES': "WHAT'S NEW", 'OTROS CAMBIOS:': 'OTHER CHANGES:', 'Salen 3 cajas cada 5 oleadas, la oleada 13 ya no tiene al jefe de muchas cabezas y los nombres pueden tener hasta 16 letras.': '3 crates appear every 5 waves, wave 13 no longer has the many-headed boss and names can be up to 16 letters.', 'HOLA': 'HI', '¡AYUDA!': 'HELP!', '¡REVÍVEME!': 'REVIVE ME!', '¡NECESITO BOTIQUÍN!': 'I NEED A MEDKIT!', '¡VAMOS!': "LET'S GO!", 'SÍGUEME': 'FOLLOW ME',
+  'NOVEDADES': "WHAT'S NEW", 'LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…': 'THE BIGGEST UPDATE IS COMING…', 'BUENO, NO TAN CERCA…': 'WELL, NOT THAT SOON…', 'OTROS CAMBIOS:': 'OTHER CHANGES:', 'Salen 3 cajas cada 5 oleadas, la oleada 13 ya no tiene al jefe de muchas cabezas y los nombres pueden tener hasta 16 letras.': '3 crates appear every 5 waves, wave 13 no longer has the many-headed boss and names can be up to 16 letters.', 'HOLA': 'HI', '¡AYUDA!': 'HELP!', '¡REVÍVEME!': 'REVIVE ME!', '¡NECESITO BOTIQUÍN!': 'I NEED A MEDKIT!', '¡VAMOS!': "LET'S GO!", 'SÍGUEME': 'FOLLOW ME',
   '¡CUIDADO, JEFE!': 'WATCH OUT, BOSS!', '¡AQUÍ HAY UNA CAJA!': 'CRATE OVER HERE!', '¡GRACIAS!': 'THANKS!', '¡BIEN HECHO!': 'WELL DONE!', '¿CÓMO ESTÁS?': 'HOW ARE YOU?', 'BIEN': 'GOOD',
   'ME TENGO QUE IR': 'I HAVE TO GO', '¡ADIÓS!': 'BYE!', 'JUGADOR': 'PLAYER',
   'MENSAJES RÁPIDOS:': 'QUICK MESSAGES:', 'En multijugador toca 💬 para mandar mensajes a tu grupo: HOLA, ¡AYUDA!, ¡VAMOS! y más. En computadora, con la tecla T.': 'In multiplayer tap 💬 to send messages to your group: HI, HELP!, LET\'S GO! and more. On computer, with the T key.', 'YAKUZA': 'YAKUZA', 'Yakuza para el Parlante, con chaleco negro y mangas de camisa. Cuesta 180 monedas.': 'Yakuza for the Speaker, with a black vest and shirt sleeves. Costs 180 coins.', '¡NIVEL': 'LEVEL', 'EXPERIENCIA': 'EXPERIENCE', 'EXPERIENCIA:': 'EXPERIENCE:',
@@ -5679,7 +5685,8 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.4';
+const GAME_VERSION = '1.4.01';
+const NEWS_VER = '1.4';                // 1.4.01 es un parche: el aviso sigue siendo el de la 1.4
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
   ['PERSONAJES NUEVOS:', 'Llegan el Camarógrafo Grande (680 monedas) y el Parlante Grande (760 monedas). Búscalos en PERSONAJES.'],
@@ -5696,9 +5703,9 @@ try {
   const seen = localStorage.getItem('skibidi_seenver');
   const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
   // si ya habías jugado con otra versión: aviso al abrir
-  if (played && seen !== GAME_VERSION) {
-    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + GAME_VERSION;
-    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + GAME_VERSION + ' TRAE:';
+  if (played && !String(seen || '').startsWith(NEWS_VER)) {   // los parches 1.4.0x no repiten el aviso de la 1.4
+    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + NEWS_VER;
+    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + NEWS_VER + ' TRAE:';
     const ul = document.getElementById('updList');
     for (const [tt, tx] of NEWS) { const li = document.createElement('li'), b = document.createElement('b'); b.textContent = tt; li.append(b, ' ', tx); ul.appendChild(li); }
     document.getElementById('updScr').style.display = 'flex';
