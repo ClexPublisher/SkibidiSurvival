@@ -249,6 +249,10 @@
   .wbtn.bossw { background: #c0392b; }
   .wbtn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
   /* --- botones secundarios del menú --- */
+  .cd { position: absolute; left: 12px; bottom: 12px; display: none; flex-direction: column; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(27, 27, 47, .88); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; pointer-events: none; }
+  .cd span { font-size: clamp(8px, 2.2vw, 11px); color: #fff; text-shadow: 2px 2px 0 #000; }
+  .cd b { font-weight: normal; font-size: clamp(14px, 4vw, 24px); color: #ffe14d; letter-spacing: .08em; text-shadow: 2px 2px 0 #c0392b, 4px 4px 0 #000; }
+  @media (max-height: 480px) { .cd { padding: 6px 10px; gap: 5px; } .cd b { font-size: 14px; } }
   .ver { position: absolute; right: 12px; bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   .menu-btns { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
   .sub {
@@ -710,7 +714,8 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.3</div>
+  <div class="ver">VERSIÓN 1.3.01</div>
+  <div class="cd" id="cd"><span id="cdTit"></span><b id="cdTime"></b></div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -913,7 +918,7 @@ const EN = {
   '¡EL JUEGO SE ACTUALIZÓ!': 'THE GAME WAS UPDATED!', '¡HAY UNA ACTUALIZACIÓN! TOCA AQUÍ PARA RECARGAR': 'UPDATE AVAILABLE! TAP HERE TO RELOAD',
   'Mantén la calma, estamos preparando un equipo que irá por ti. Aguanta un poco.': 'Stay calm, we are getting a team ready to come for you. Hold on a little longer.',
   '¡Bien! Lo hiciste bien, estamos llegando por ti…': 'Great! You did well, we are coming for you…',
-  'NOVEDADES': "WHAT'S NEW", '🔒 GRUPOS PRIVADOS': '🔒 PRIVATE GROUPS', 'GRUPOS PRIVADOS': 'PRIVATE GROUPS', 'Escribe el código del grupo': 'Type the group code',
+  'NOVEDADES': "WHAT'S NEW", '1.4 VIENE': '1.4 IS COMING', '🔒 GRUPOS PRIVADOS': '🔒 PRIVATE GROUPS', 'GRUPOS PRIVADOS': 'PRIVATE GROUPS', 'Escribe el código del grupo': 'Type the group code',
   'No hay grupos públicos': 'No public groups', 'VOLVER AL MENÚ': 'BACK TO MENU', 'BUFANDA': 'SCARF', 'Bufanda para el Televisor, con cuchilla morada brillante. Cuesta 220 monedas.': 'Scarf for the TV, with a glowing purple blade. Costs 220 coins.',
   'MISIONES': 'MISSIONS', 'RECLAMAR': 'CLAIM', '✔ RECLAMADA': '✔ CLAIMED', 'NUEVAS MISIONES EN': 'NEW MISSIONS IN', '¡MISIÓN COMPLETADA!': 'MISSION COMPLETE!',
   'Elimina 30 inodoros': 'Defeat 30 toilets', 'Llega a la oleada 3': 'Reach wave 3', 'Rompe 1 caja': 'Break 1 crate', 'Usa 3 habilidades en una partida': 'Use 3 abilities in one game',
@@ -5079,7 +5084,8 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.3';
+const GAME_VERSION = '1.3.01';
+const NEWS_VER = '1.3';                // 1.3.01 es un parche: el aviso sigue siendo el de la 1.3
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
   ['MEJORAS DE HABILIDADES:', 'Todas las habilidades parten en nivel I. Subir a nivel II cuesta 180 monedas y a nivel III cuesta 280.'],
@@ -5095,13 +5101,24 @@ const NEWS = [
   ['CAÍDOS:', 'En multijugador, si nadie te revive en 2 oleadas, mueres hasta que termine la partida.'],
 ];
 document.querySelector('.ver').textContent = 'VERSIÓN ' + GAME_VERSION;
+/* ----- contador para la 1.4 (hora de Chile, UTC-3) ----- */
+const CD_FROM = Date.parse('2026-10-21T21:05:00-03:00'), CD_TO = Date.parse('2026-10-22T16:30:00-03:00');
+function cdTick() {
+  const now = Date.now(), el = document.getElementById('cd');
+  if (now < CD_FROM || now >= CD_TO) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const t = Math.ceil((CD_TO - now) / 1000), pad = n => String(n).padStart(2, '0');
+  document.getElementById('cdTit').textContent = '1.4 VIENE';
+  document.getElementById('cdTime').textContent = pad(Math.floor(t / 3600)) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+}
+cdTick(); setInterval(cdTick, 1000);
 try {
   const seen = localStorage.getItem('skibidi_seenver');
   const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
   // si ya habías jugado con otra versión: aviso al abrir
-  if (played && seen !== GAME_VERSION) {
-    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + GAME_VERSION;
-    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + GAME_VERSION + ' TRAE:';
+  if (played && !String(seen || '').startsWith(NEWS_VER)) {   // los parches 1.3.0x no repiten el aviso de la 1.3
+    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + NEWS_VER;
+    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + NEWS_VER + ' TRAE:';
     const ul = document.getElementById('updList');
     for (const [tt, tx] of NEWS) { const li = document.createElement('li'), b = document.createElement('b'); b.textContent = tt; li.append(b, ' ', tx); ul.appendChild(li); }
     document.getElementById('updScr').style.display = 'flex';
