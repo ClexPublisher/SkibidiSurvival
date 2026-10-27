@@ -269,6 +269,7 @@
     color: #ffe14d; text-align: left; background: rgba(27, 27, 47, .88); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; text-shadow: 2px 2px 0 #000; pointer-events: none; animation: soonPulse 1.6s ease-in-out infinite; }
   .soon-big span, .soon-big small { display: block; }
   .soon-big small { margin-top: 6px; font-size: .75em; color: #c8d3dc; }
+  .soon-cd { display: none; margin-top: 10px; font-weight: normal; font-size: clamp(14px, 4vw, 24px); color: #ffe14d; letter-spacing: .08em; text-shadow: 2px 2px 0 #c0392b, 4px 4px 0 #000; text-align: center; }
   @keyframes soonPulse { 50% { border-color: #ff8a1c; } }
   .ver { position: absolute; right: 12px; bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   .menu-btns { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
@@ -766,8 +767,8 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.4.01</div>
-  <div class="soon-big"><span>LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…</span><small>BUENO, NO TAN CERCA…</small></div>
+  <div class="ver">VERSIÓN 1.4.02</div>
+  <div class="soon-big"><span>LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…</span><small>BUENO, NO TAN CERCA…</small><b class="soon-cd" id="cdTime"></b></div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -5685,8 +5686,18 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.4.01';
-const NEWS_VER = '1.4';                // 1.4.01 es un parche: el aviso sigue siendo el de la 1.4
+const GAME_VERSION = '1.4.02';
+const NEWS_VER = '1.4';                // 1.4.0x son parches: el aviso sigue siendo el de la 1.4
+/* ----- contador para la 1.5 (hora de Chile, UTC-3) ----- */
+const CD_FROM = Date.parse('2026-10-26T21:40:00-03:00'), CD_TO = Date.parse('2026-10-28T16:30:00-03:00');
+function cdTick() {
+  const now = Date.now(), el = document.getElementById('cdTime'); if (!el) return;
+  if (now < CD_FROM || now >= CD_TO) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const t = Math.ceil((CD_TO - now) / 1000), pad = n => String(n).padStart(2, '0');
+  el.textContent = pad(Math.floor(t / 3600)) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+}
+setTimeout(() => { cdTick(); setInterval(cdTick, 1000); }, 0);
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
   ['PERSONAJES NUEVOS:', 'Llegan el Camarógrafo Grande (680 monedas) y el Parlante Grande (760 monedas). Búscalos en PERSONAJES.'],
