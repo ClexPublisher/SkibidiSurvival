@@ -233,6 +233,11 @@
   }
   .mode-card .label { padding: 14px 8px 16px; font-size: clamp(14px, 3.4vw, 20px); text-shadow: 3px 3px 0 #000; background: #3a4046; border-top: 4px solid #1b1b2f; }
   .mode-card.solo .label { background: #27ae60; }
+  .mode-card.chap-card { width: min(700px, 92vw); }
+  .mode-card.chap-card canvas { aspect-ratio: 32 / 9; }
+  .mode-card.arena-card .label { background: #c0392b; }
+  .mode-card.arena-card.priv .label { background: #7f3fbf; }
+  .mode-card.nope { animation: nope .35s; }
   .mode-card.soon { cursor: not-allowed; }
   .mode-card.soon canvas { filter: grayscale(1) brightness(.6); }
   .mode-card.soon .label { color: #bfc5ca; }
@@ -255,6 +260,7 @@
   .chap:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #000; }
   .chap.locked { background: #4a5056; color: #9aa3a8; cursor: not-allowed; }
   .chap.locked small { font-size: clamp(7px, 1.8vw, 10px); color: #ffe14d; }
+  .chap small.new { font-size: clamp(7px, 1.8vw, 10px); color: #ffe14d; display: block; margin-top: 4px; }
   .waves-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); width: min(560px, 92vw); }
   .wbtn {
     font-family: inherit; font-size: clamp(14px, 4vw, 22px); color: #fff; cursor: pointer;
@@ -265,12 +271,6 @@
   .wbtn.bossw { background: #c0392b; }
   .wbtn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
   /* --- botones secundarios del menú --- */
-  .soon-big { position: absolute; left: 12px; bottom: 12px; max-width: min(46vw, 330px); padding: 10px 14px; font-family: 'Press Start 2P', monospace; font-size: clamp(8px, 2.2vw, 12px); line-height: 1.7;
-    color: #ffe14d; text-align: left; background: rgba(27, 27, 47, .88); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; text-shadow: 2px 2px 0 #000; pointer-events: none; animation: soonPulse 1.6s ease-in-out infinite; }
-  .soon-big span, .soon-big small { display: block; }
-  .soon-big small { margin-top: 6px; font-size: .75em; color: #c8d3dc; }
-  .soon-cd { display: none; margin-top: 10px; font-weight: normal; font-size: clamp(14px, 4vw, 24px); color: #ffe14d; letter-spacing: .08em; text-shadow: 2px 2px 0 #c0392b, 4px 4px 0 #000; text-align: center; }
-  @keyframes soonPulse { 50% { border-color: #ff8a1c; } }
   .ver { position: absolute; right: 12px; bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; pointer-events: none; }
   .menu-btns { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
   .sub {
@@ -311,6 +311,15 @@
   .cust-menu { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; background: #cdd2d4; border: 4px solid #1b1b2f; box-shadow: 5px 5px 0 #000; padding: 14px;
     display: flex; flex-direction: column; gap: 12px; align-items: center; color: #1b1b2f; }
   @media (max-aspect-ratio: 1/1) { .cust-wrap { flex-direction: column; } }   /* celular vertical: uno arriba del otro */
+  .cust-sec { display: flex; gap: 8px; width: 100%; margin-bottom: 12px; }
+  .cust-sec button { flex: 1; font-family: inherit; font-size: clamp(8px, 2.1vw, 11px); padding: 10px 6px; cursor: pointer; color: #1b1b2f; background: #fff; border: 3px solid #1b1b2f; border-radius: 999px; box-shadow: 2px 2px 0 #000; }
+  .cust-sec button.on { background: #8e44ad; color: #fff; }
+  .cust-chars { display: contents; }
+  .cust-guns { display: none; min-height: 120px; }
+  .bust .eqb.free { background: #e67e22; } .bust .eqb s { color: #ffe9c7; }
+  .bust.nope { animation: nope .35s; }
+  .gun-msg { flex: 0 0 100%; min-height: 1em; font-family: 'Press Start 2P', monospace; font-size: 9px; color: #c0392b; text-align: center; }
+  .bust .eqb { position: absolute; top: 4px; right: 4px; font-family: 'Press Start 2P', monospace; font-size: 7px; color: #fff; background: #27ae60; border: 2px solid #000; padding: 3px 4px; }
   .cust-tabs { display: none; gap: 6px; width: 100%; }
   .char-back { display: none; align-self: flex-start; font-family: inherit; font-size: clamp(9px, 2.2vw, 12px); padding: 8px 14px; cursor: pointer;
     color: #fff; background: #34495e; border: 3px solid #1b1b2f; box-shadow: 2px 2px 0 #000; }
@@ -444,6 +453,15 @@
   .mp-slot .tag { font-size: clamp(6px, 1.5vw, 9px); color: #ffe14d; }
   .mp-slot.me { border-color: #2e86de; } .mp-slot.empty { opacity: .45; }
   .mp-slot.empty .nm { color: #9aa4ab; }
+  .mp-players.arena { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mp-team { border: 4px solid #1b1b2f; box-shadow: 3px 3px 0 #000; padding: 6px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .mp-team.red { background: #5a1f1f; } .mp-team.blue { background: #1f325a; }
+  .mp-team-hd { text-align: center; font-size: clamp(8px, 2vw, 12px); color: #fff; padding: 4px; }
+  .mp-team.red .mp-team-hd { background: #e74c3c; } .mp-team.blue .mp-team-hd { background: #2e86de; }
+  .mp-team-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .mp-team .mp-slot { padding: 4px 2px 6px; gap: 4px; }
+  .mp-team.red .mp-slot.me { border-color: #ff6b5b; } .mp-team.blue .mp-slot.me { border-color: #5dade2; }
+  .mp-swap { font-family: inherit; font-size: clamp(6px, 1.4vw, 9px); color: #fff; background: #8e44ad; border: 2px solid #1b1b2f; box-shadow: 2px 2px 0 #000; padding: 4px 3px; cursor: pointer; width: 100%; }
   #mpScr { justify-content: flex-start; overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding-top: 3vh; padding-bottom: 3vh; gap: 2vh; }
   #mpScr > :first-child { margin-top: auto; } #mpScr > :last-child { margin-bottom: auto; }   /* al centro; si no cabe, se desliza */
   .mp-chaps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
@@ -519,6 +537,30 @@
   .fr-msg { min-height: 1em; font-size: 9px; line-height: 1.7; color: #ffe14d; text-align: center; }
   .fr-note { font-size: 8px; line-height: 1.8; color: #8a96a3; text-align: center; }
   .fr-bottom { display: flex; gap: 10px; }
+  .fr-row.tap { cursor: pointer; } .fr-row.tap:hover { background: #34495e; }
+  .fr-row .go { color: #8a96a3; font-size: 12px; flex: none; }
+  #frProf { overflow-y: auto; touch-action: pan-y; }
+  .pf-head { display: flex; align-items: center; gap: 14px; }
+  .pf-head canvas, .pf-chars canvas { position: static; display: block; border: 3px solid #000; image-rendering: pixelated; }
+  .pf-head canvas { width: 84px; height: 84px; flex: none; }
+  .pf-id { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .pf-name { color: #fff; font-size: clamp(11px, 3vw, 15px); word-break: break-word; }
+  .pf-st { font-size: 8px; color: #8a96a3; } .pf-st.on { color: #2ecc71; }
+  .pf-lv { display: flex; align-items: center; gap: 8px; font-size: 9px; color: #ffe14d; }
+  .pf-lbl { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #ffe14d; border-bottom: 3px solid #2c3e50; padding-bottom: 6px; }
+  .pf-lbl b { color: #fff; font-weight: normal; }
+  .pf-chars { display: flex; flex-direction: column; gap: 8px; }
+  .pf-ch { display: flex; gap: 10px; align-items: center; padding: 8px; background: #2c3e50; border: 3px solid #000; }
+  .pf-ch.off { opacity: .45; }
+  .pf-ch > canvas { width: 54px; height: 54px; flex: none; }
+  .pf-ch .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .pf-ch .cn { color: #fff; font-size: clamp(8px, 2.2vw, 10px); }
+  .pf-ch .lock { color: #aab3b8; font-size: 8px; }
+  .pf-skins { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pf-sk { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 50px; }
+  .pf-sk canvas { width: 36px; height: 36px; border-width: 2px; }
+  .pf-sk span { font-size: 6px; color: #cfd6db; text-align: center; line-height: 1.4; word-break: break-word; }
+  .pf-sk.eq canvas { border-color: #ffe14d; }
   .fr-bottom .fr-b { flex: 1; padding: 12px 6px; }
   /* misiones */
   .ms-btn { position: absolute; top: 62px; right: 80px; height: 46px; padding: 0 12px; cursor: pointer; font-family: 'Press Start 2P', monospace; font-size: clamp(9px, 2.2vw, 12px);
@@ -565,6 +607,44 @@
   .mp-players { margin-top: 34px; }
   .chat-feed div { font-family: 'Press Start 2P', monospace; font-size: clamp(7px, 1.8vw, 10px); color: #fff; padding: 4px 8px; background: rgba(0, 0, 0, .55); text-shadow: 1px 1px 0 #000; transition: opacity .6s; white-space: nowrap; }
   .chat-feed b { color: #5ec8ff; font-weight: normal; }
+  .inv-pop { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 90; display: none; flex-direction: column; align-items: center; gap: 12px; padding: 14px 18px; width: min(420px, 92vw);
+    font-family: 'Press Start 2P', monospace; color: #fff; text-align: center; font-size: clamp(9px, 2.4vw, 12px); line-height: 1.6; background: #1b1b2f; border: 4px solid #27ae60; box-shadow: 5px 5px 0 #000; }
+  .inv-pop b { color: #ffe14d; font-weight: normal; }
+  .inv-pop .row { display: flex; gap: 10px; }
+  .mp-invite { font-family: inherit; font-size: clamp(9px, 2.4vw, 12px); color: #fff; cursor: pointer; padding: 10px 16px; background: #8e44ad; border: 3px solid #1b1b2f; box-shadow: 3px 3px 0 #000; text-shadow: 1px 1px 0 #000; }
+  /* ARENA · JUEGO RÁPIDO: búsqueda de jugadores */
+  .aq-scr { position: fixed; inset: 0; z-index: 65; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 12, 20, .78); }
+  .aq-box { background: #1b1b2f; border: 5px solid #c0392b; box-shadow: 6px 6px 0 #000; padding: 20px 18px; width: min(460px, 94vw); display: flex; flex-direction: column; gap: 14px; align-items: center;
+    font-family: 'Press Start 2P', monospace; color: #fff; text-align: center; }
+  .aq-box h3 { margin: 0; font-weight: normal; color: #ffe14d; font-size: clamp(13px, 3.6vw, 18px); text-shadow: 2px 2px 0 #000; }
+  .aq-mode { width: 100%; display: flex; justify-content: space-between; align-items: center; font-family: inherit; font-size: clamp(12px, 3.4vw, 18px); color: #fff; cursor: pointer; padding: 14px 16px;
+    background: #c0392b; border: 3px solid #000; box-shadow: 3px 3px 0 #000; text-shadow: 2px 2px 0 #000; }
+  .aq-mode small { font-size: 8px; color: #ffd6cf; }
+  .aq-mode:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+  .aq-count { font-size: clamp(22px, 7vw, 40px); color: #ffe14d; text-shadow: 3px 3px 0 #c0392b, 5px 5px 0 #000; }
+  .aq-note { font-size: 9px; line-height: 1.8; color: #9fb3c8; }
+  .aq-teams { display: flex; gap: 12px; width: 100%; }
+  .aq-team { flex: 1; padding: 10px 6px; background: #2c3e50; border: 3px solid #000; font-size: 9px; line-height: 2; }
+  .aq-team.red { background: #6b1f1f; border-color: #e74c3c; } .aq-team.blue { background: #1f3d6b; border-color: #2e86de; }
+  .aq-team.red b { color: #ff8a80; } .aq-team.blue b { color: #8fc8ff; }
+  .aq-pl { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-bottom: 8px; }
+  .aq-pl canvas { position: static; display: block; width: 64px; height: 64px; border: 2px solid #000; }
+  .aq-pl .cn { font-size: 8px; color: #fff; } .aq-pl small { font-size: 7px; color: #c8d3dc; } .aq-pl.me small { color: #ffe14d; }
+  .arena-cd { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 70; display: none; font-family: 'Press Start 2P', monospace; font-size: clamp(48px, 16vw, 120px);
+    color: #ffe14d; text-shadow: 5px 5px 0 #c0392b, 9px 9px 0 #000; pointer-events: none; }
+  .ar-spec { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 62; display: none; align-items: center; gap: 10px; background: rgba(27,27,47,.92); border: 4px solid #fff; box-shadow: 4px 4px 0 #000; padding: 8px 10px; font-family: 'Press Start 2P', monospace; }
+  .ar-spec div { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 150px; }
+  .ar-spec small { font-size: 9px; color: #ff6b5e; } .ar-spec b { font-size: 13px; color: #fff; font-weight: normal; }
+  .ar-spec button { font-family: inherit; font-size: 14px; color: #fff; background: #2e86de; border: 3px solid #000; box-shadow: 2px 2px 0 #000; width: 40px; height: 36px; cursor: pointer; }
+  .ar-win { position: fixed; inset: 0; z-index: 72; display: none; align-items: center; justify-content: center; background: rgba(10,12,20,.7); font-family: 'Press Start 2P', monospace; padding: 16px; }
+  .ar-win-box { background: #1b1b2f; border: 5px solid #fff; box-shadow: 6px 6px 0 #000; padding: 22px 18px; width: min(460px, 92vw); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+  .ar-win-t { font-size: clamp(14px, 4.4vw, 22px); line-height: 1.5; }
+  .ar-win-t.red { color: #ff5a4e; text-shadow: 3px 3px 0 #000; } .ar-win-t.blue { color: #5aa9ff; text-shadow: 3px 3px 0 #000; } .ar-win-t.draw { color: #ffe14d; }
+  .ar-win-names { font-size: 9px; color: #cfd6db; line-height: 2; }
+  .ar-win-r { font-size: 12px; color: #ffe14d; } .ar-win-r.lose { color: #9aa4ab; font-size: 10px; }
+  .ar-win-box .fr-b { padding: 12px 30px; }
+  .arena-cd.go { color: #7dff9a; text-shadow: 5px 5px 0 #1e8449, 9px 9px 0 #000; }
+  .aq-team b { display: block; font-weight: normal; color: #ffe14d; margin-bottom: 4px; }
   .upd-scr { position: fixed; inset: 0; z-index: 79; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 12, 20, .7); }
   .upd-box { background: #1b1b2f; border: 5px solid #27ae60; box-shadow: 6px 6px 0 #000; padding: 24px 22px; width: min(440px, 92vw); display: flex; flex-direction: column; gap: 18px; align-items: center;
     font-family: 'Press Start 2P', monospace; color: #fff; text-align: center; font-size: clamp(11px, 3vw, 16px); line-height: 1.7; }
@@ -647,12 +727,38 @@
     .shop-btn, .cust-btn { padding: 6px 20px; font-size: min(3vw, 4.4vh); }
     .set-btn { padding: 5px 14px; font-size: min(2.3vw, 3.4vh); }
     .dbg-btn { padding: 5px 10px; }
+    #playScr { gap: 2vh; }
+    #playScr h2 { font-size: 16px; }
+    #playScr .cards { flex-wrap: nowrap; gap: 14px; }
+    #playScr .mode-card.chap-card { width: 44vw; }
+    #arenaScr { gap: 2vh; } #arenaScr h2 { font-size: 16px; } #arenaScr .cards { flex-wrap: nowrap; gap: 14px; } #arenaScr .mode-card { width: 40vw; }
+    #playScr .mode-card .label { padding: 8px 6px 10px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
 <canvas id="city"></canvas>
 <canvas id="game"></canvas>
+
+<!-- JUGAR: capítulos (y otro modo que llegará después) -->
+<div class="modes" id="playScr">
+  <h2>JUGAR</h2>
+  <div class="cards">
+    <button class="mode-card solo chap-card" id="playChaps"><canvas id="sceneChaps" width="640" height="180"></canvas><div class="label">CAPÍTULOS</div></button>
+    <button class="mode-card arena-card chap-card" id="playArena"><canvas id="sceneArena" width="640" height="180"></canvas><div class="label">ARENA</div></button>
+  </div>
+  <button class="back" id="playBack">◀ VOLVER</button>
+</div>
+
+<div class="modes" id="arenaScr">
+  <h2>ARENA</h2>
+  <div class="cards">
+    <button class="mode-card arena-card" id="arenaQuick"><canvas id="sceneQuick" width="320" height="180"></canvas><div class="label">JUEGO RÁPIDO</div></button>
+    <button class="mode-card arena-card priv" id="arenaPriv"><canvas id="scenePriv" width="320" height="180"></canvas><div class="label">🔒 PRIVADO</div></button>
+  </div>
+  <div class="mp-msg" id="arenaMsg"></div>
+  <button class="back" id="arenaBack">◀ VOLVER</button>
+</div>
 
 <div class="modes" id="modes">
   <h2>ELIGE MODO</h2>
@@ -667,7 +773,7 @@
   <h2>MODO SOLO</h2>
   <div class="grid chapters">
     <button class="chap" id="chap1">CAPÍTULO<b>1</b></button>
-    <button class="chap locked">CAPÍTULO<b>2</b><small>PRÓXIMAMENTE</small></button>
+    <button class="chap locked" id="chap2">CAPÍTULO<b>2</b><small>MUY CERCA</small></button>
     <button class="chap locked">CAPÍTULO<b>3</b><small>PRÓXIMAMENTE</small></button>
   </div>
   <button class="back" id="chaptersBack">◀ VOLVER</button>
@@ -701,9 +807,10 @@
     <button class="mp-priv" id="mpPriv">🔒 PRIVADO</button>
     <div class="mp-sub">Compártelo con tus amigos para que se unan</div>
     <div class="mp-players" id="mpPlayers"></div>
-    <div class="mp-label">CAPÍTULO</div>
+    <div class="mp-label" id="mpChapLbl">CAPÍTULO</div>
     <div class="mp-chaps" id="mpChaps"></div>
     <div class="mp-msg" id="mpGroupMsg"></div>
+    <button class="mp-invite" id="mpInvite">👥 INVITAR AMIGOS</button>
     <button class="mp-big mp-start" id="mpStart">EMPEZAR</button>
   </div>
   <button class="back" id="mpBack">◀ VOLVER</button>
@@ -734,7 +841,7 @@
 
 <div class="modes" id="custScr">
   <div class="coins-bar"><span class="coin"></span><span id="coinCount">0</span></div>
-  <h2>PERSONAJES</h2>
+  <h2>PERSONALIZAR</h2>
   <div class="cust-wrap">
     <div class="cust-stage">
       <div class="pv-wrap"><canvas id="custPreview" width="230" height="280"></canvas></div>
@@ -744,12 +851,16 @@
       </div>
     </div>
     <div class="cust-menu">
+      <div class="cust-sec"><button id="secChars" class="on">PERSONAJES</button><button id="secGuns">ARMAS</button></div>
+      <div class="cust-guns char-row" id="custGuns"></div>
+      <div class="cust-chars" id="custChars">
       <button class="char-back" id="charBack">◀ PERSONAJES</button>
       <div class="cust-tabs" id="custTabs"><button id="tabSkins" class="on">SKINS</button><button id="tabSkills">HABILIDADES</button></div>
       <div class="char-row" id="charRow"></div>
       <div class="cust-list" id="skinList"></div>
       <div class="cust-list" id="skillList"></div>
       <div class="cust-soon" id="skillsSoon">PRÓXIMAMENTE</div>
+      </div>
     </div>
   </div>
   <button class="back" id="custBack">◀ VOLVER</button>
@@ -763,16 +874,41 @@
   <h1>SKIBIDI<span>SURVIVAL</span></h1>
   <div class="menu-btns">
     <button class="play" id="play">▶ JUGAR</button>
-    <button class="sub cust-btn" id="custBtn">PERSONAJES</button>
+    <button class="sub cust-btn" id="custBtn">PERSONALIZAR</button>
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.4.02</div>
-  <div class="soon-big"><span>LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…</span><small>BUENO, NO TAN CERCA…</small><b class="soon-cd" id="cdTime"></b></div>
+  <div class="ver">VERSIÓN 1.4</div>
 </div>
 
 <div class="dmg" id="dmg"></div>
 <div class="lvup" id="lvUp"></div>
+<div class="arena-cd" id="arenaCd"></div>
+<div class="ar-spec" id="arSpec"><button id="arSpecL" aria-label="anterior">◀</button><div><small>ELIMINADO · ESPECTANDO A</small><b id="arSpecName"></b></div><button id="arSpecR" aria-label="siguiente">▶</button></div>
+<div class="ar-win" id="arWin"><div class="ar-win-box"><div class="ar-win-t" id="arWinT"></div><div class="ar-win-names" id="arWinNames"></div><div class="ar-win-r" id="arWinR"></div><button class="fr-b" id="arWinOk">MENÚ</button></div></div>
+<div class="aq-scr" id="aqScr">
+  <div class="aq-box" id="aqPick">
+    <h3>JUEGO RÁPIDO</h3>
+    <button class="aq-mode" data-n="1"><span>1 VS 1</span><small id="aqC1"></small></button>
+    <button class="aq-mode" data-n="2"><span>2 VS 2</span><small id="aqC2"></small></button>
+    <button class="aq-mode" data-n="3"><span>3 VS 3</span><small id="aqC3"></small></button>
+    <button class="fr-b gray" id="aqClose">◀ VOLVER</button>
+  </div>
+  <div class="aq-box" id="aqWait" style="display:none">
+    <h3 id="aqTitle"></h3>
+    <div class="aq-note" id="aqDots">BUSCANDO JUGADORES</div>
+    <div class="aq-count" id="aqCount">1 / 2</div>
+    <div class="aq-note" id="aqHint"></div>
+    <button class="fr-b red" id="aqCancel">CANCELAR</button>
+  </div>
+  <div class="aq-box" id="aqFound" style="display:none">
+    <h3>¡PARTIDA ENCONTRADA!</h3>
+    <div class="aq-teams" id="aqTeams"></div>
+    <div class="aq-note" id="aqFoundMsg"></div>
+    <button class="fr-b gray" id="aqOk">SALIR</button>
+  </div>
+</div>
+<div class="inv-pop" id="invPop"><div id="invTxt"></div><div class="row"><button class="fr-b" id="invYes">UNIRSE</button><button class="fr-b gray" id="invNo">AHORA NO</button></div></div>
 <button class="chat-btn" id="chatBtn" aria-label="mensajes rápidos">💬</button>
 <div class="chat-pan" id="chatPan"></div>
 <div class="chat-feed" id="chatFeed"></div>
@@ -870,6 +1006,13 @@
     <div class="fr-note">Tu amigo tiene que tener el juego abierto para recibir la solicitud.</div>
     <div class="fr-bottom"><button type="submit" class="fr-b">ENVIAR SOLICITUD</button><button type="button" class="fr-b gray" id="frAddBack">◀ VOLVER</button></div>
   </form>
+  <div class="fr-box" id="frProf" style="display:none">
+    <div class="pf-head"><canvas id="pfBust" width="96" height="96"></canvas><div class="pf-id"><div class="pf-name" id="pfName"></div><div class="pf-st" id="pfSt"></div><div class="pf-lv" id="pfLv"></div></div></div>
+    <div class="pf-lbl"><span>PERSONAJES</span><b id="pfCount"></b></div>
+    <div class="pf-chars" id="pfChars"></div>
+    <div class="fr-note" id="pfNote"></div>
+    <div class="fr-bottom"><button class="fr-b gray" id="frProfBack">◀ VOLVER</button></div>
+  </div>
   <div class="fr-box" id="frReqs" style="display:none">
     <div class="fr-top"><h3>SOLICITUDES</h3></div>
     <div class="fr-list" id="frReqList"></div>
@@ -989,7 +1132,7 @@ const EN = {
   '¡EL JUEGO SE ACTUALIZÓ!': 'THE GAME WAS UPDATED!', '¡HAY UNA ACTUALIZACIÓN! TOCA AQUÍ PARA RECARGAR': 'UPDATE AVAILABLE! TAP HERE TO RELOAD',
   'Mantén la calma, estamos preparando un equipo que irá por ti. Aguanta un poco.': 'Stay calm, we are getting a team ready to come for you. Hold on a little longer.',
   '¡Bien! Lo hiciste bien, estamos llegando por ti…': 'Great! You did well, we are coming for you…',
-  'NOVEDADES': "WHAT'S NEW", 'LA ACTUALIZACIÓN MÁS GRANDE SE ACERCA…': 'THE BIGGEST UPDATE IS COMING…', 'BUENO, NO TAN CERCA…': 'WELL, NOT THAT SOON…', 'OTROS CAMBIOS:': 'OTHER CHANGES:', 'Salen 3 cajas cada 5 oleadas, la oleada 13 ya no tiene al jefe de muchas cabezas y los nombres pueden tener hasta 16 letras.': '3 crates appear every 5 waves, wave 13 no longer has the many-headed boss and names can be up to 16 letters.', 'HOLA': 'HI', '¡AYUDA!': 'HELP!', '¡REVÍVEME!': 'REVIVE ME!', '¡NECESITO BOTIQUÍN!': 'I NEED A MEDKIT!', '¡VAMOS!': "LET'S GO!", 'SÍGUEME': 'FOLLOW ME',
+  'NOVEDADES': "WHAT'S NEW", '¡LLEGA LA ARENA!:': 'THE ARENA IS HERE!:', 'En JUGAR ahora eliges entre CAPÍTULOS y ARENA. En la Arena peleas EQUIPO ROJO contra EQUIPO AZUL.': 'In PLAY you now choose between CHAPTERS and ARENA. In the Arena it is RED TEAM vs BLUE TEAM.', 'JUEGO RÁPIDO:': 'QUICK PLAY:', 'Elige 1 VS 1, 2 VS 2 o 3 VS 3 y el juego busca jugadores. Cada equipo aparece en su lado del mapa y… 3, 2, 1… ¡YA!': 'Pick 1 VS 1, 2 VS 2 or 3 VS 3 and the game finds players. Each team spawns on its side of the map and… 3, 2, 1… GO!', 'ARENA PRIVADA:': 'PRIVATE ARENA:', 'Crea un grupo con código para jugar con tus amigos (hasta 6) y cámbiate entre el equipo rojo y el azul.': 'Create a group with a code to play with your friends (up to 6) and switch between the red and blue team.', 'LA PELEA:': 'THE FIGHT:', 'Tus balas dañan al otro equipo. Si te eliminan, miras la pantalla de tus compañeros. El equipo que elimina a todos los del otro gana y cada ganador recibe 60 monedas.': 'Your bullets hurt the other team. If you get eliminated, you watch your teammates. The team that eliminates everyone on the other team wins and each winner gets 60 coins.', 'INVITAR AMIGOS:': 'INVITE FRIENDS:', 'Desde tu grupo toca 👥 INVITAR AMIGOS y a tu amigo le llega la invitación. Los amigos que están en una partida salen como JUGANDO.': 'From your group tap 👥 INVITE FRIENDS and your friend gets the invite. Friends in a match show as PLAYING.', 'PERFIL DE AMIGOS:': 'FRIEND PROFILES:', 'En AMIGOS toca a un amigo para ver su nombre, su nivel y los personajes y skins que tiene.': 'In FRIENDS tap a friend to see their name, level and the characters and skins they have.', 'CAJAS:': 'CRATES:', 'Ahora dan botiquín más seguido (75%) y bebida de velocidad el resto (25%).': 'They now give a medkit more often (75%) and a speed drink the rest of the time (25%).', 'CAPÍTULO 2:': 'CHAPTER 2:', '¡Ya está MUY CERCA!': "It's VERY CLOSE!", 'RIFLE DE ASALTO': 'ASSAULT RIFLE', 'ESCOPETA': 'SHOTGUN', 'LANZACOHETES': 'ROCKET LAUNCHER', '¡TODAVÍA NO SE PUEDE USAR!': "YOU CAN'T USE IT YET!", 'PISTOLA': 'PISTOL', 'EQUIPADA': 'EQUIPPED', 'PERSONALIZAR': 'CUSTOMIZE', 'ARMAS': 'WEAPONS', 'MUY CERCA': 'VERY CLOSE', 'ELIMINADO · ESPECTANDO A': 'ELIMINATED · SPECTATING', '¡ELIMINADO!': 'ELIMINATED!', '¡EMPATE!': 'DRAW!', '¡GANA EL EQUIPO ROJO!': 'RED TEAM WINS!', '¡GANA EL EQUIPO AZUL!': 'BLUE TEAM WINS!', 'GANASTE': 'YOU WON', 'PERDISTE': 'YOU LOST', 'NADIE GANÓ': 'NOBODY WON', 'MENÚ': 'MENU', 'NIVEL': 'LEVEL', 'NO DESBLOQUEADO': 'NOT UNLOCKED', 'Así estaba la última vez que lo viste conectado.': 'This is how it was the last time you saw them online.', 'Tu amigo tiene que conectarse para ver sus personajes.': 'Your friend has to come online to see their characters.', '¡NUEVO!': 'NEW!', '¡Lo lograste! Salvaste nuestra nave… pero esto todavía no termina.': "You did it! You saved our ship… but this isn't over yet.", 'ARENA PRIVADA': 'PRIVATE ARENA', 'MULTIJUGADOR': 'MULTIPLAYER', 'ROJO': 'RED', 'AZUL': 'BLUE', 'FALTA UN EQUIPO': 'A TEAM IS EMPTY', 'Ese grupo está lleno': 'That group is full', 'máximo': 'max', 'Crea un grupo y peleen EQUIPO ROJO contra EQUIPO AZUL (hasta 6 jugadores).': 'Create a group and fight RED TEAM vs BLUE TEAM (up to 6 players).', 'EQUIPO ROJO': 'RED TEAM', 'EQUIPO AZUL': 'BLUE TEAM', 'ENTRANDO A LA ARENA…': 'ENTERING THE ARENA…', '¡YA!': 'GO!', 'SALIR': 'LEAVE', 'No se pudo conectar. Intenta de nuevo.': "Couldn't connect. Try again.", 'Los demás no llegaron. Intenta de nuevo.': "The others didn't arrive. Try again.", 'BUSCANDO JUGADORES': 'LOOKING FOR PLAYERS', 'BUSCANDO': 'SEARCHING', 'FALTAN': 'NEED', 'JUGADORES': 'PLAYERS', '¡PARTIDA ENCONTRADA!': 'MATCH FOUND!', 'EQUIPO 1': 'TEAM 1', 'EQUIPO 2': 'TEAM 2', '(TÚ)': '(YOU)', 'La batalla de la ARENA llega muy pronto.': 'The ARENA battle is coming very soon.', 'CANCELAR': 'CANCEL', 'JUGANDO': 'PLAYING', 'INVITAR': 'INVITE', 'INVITADO ✔': 'INVITED ✔', '👥 INVITAR AMIGOS': '👥 INVITE FRIENDS', 'TE INVITA A SU GRUPO!': 'INVITES YOU TO THEIR GROUP!', 'AHORA NO': 'NOT NOW', 'ARENA': 'ARENA', 'JUEGO RÁPIDO': 'QUICK PLAY', '🔒 PRIVADO': '🔒 PRIVATE', '¡LA ARENA LLEGA MUY PRONTO!': 'THE ARENA IS COMING VERY SOON!', 'JUGAR': 'PLAY', 'CAPÍTULOS': 'CHAPTERS', 'OTROS CAMBIOS:': 'OTHER CHANGES:', 'Salen 3 cajas cada 5 oleadas, la oleada 13 ya no tiene al jefe de muchas cabezas y los nombres pueden tener hasta 16 letras.': '3 crates appear every 5 waves, wave 13 no longer has the many-headed boss and names can be up to 16 letters.', 'HOLA': 'HI', '¡AYUDA!': 'HELP!', '¡REVÍVEME!': 'REVIVE ME!', '¡NECESITO BOTIQUÍN!': 'I NEED A MEDKIT!', '¡VAMOS!': "LET'S GO!", 'SÍGUEME': 'FOLLOW ME',
   '¡CUIDADO, JEFE!': 'WATCH OUT, BOSS!', '¡AQUÍ HAY UNA CAJA!': 'CRATE OVER HERE!', '¡GRACIAS!': 'THANKS!', '¡BIEN HECHO!': 'WELL DONE!', '¿CÓMO ESTÁS?': 'HOW ARE YOU?', 'BIEN': 'GOOD',
   'ME TENGO QUE IR': 'I HAVE TO GO', '¡ADIÓS!': 'BYE!', 'JUGADOR': 'PLAYER',
   'MENSAJES RÁPIDOS:': 'QUICK MESSAGES:', 'En multijugador toca 💬 para mandar mensajes a tu grupo: HOLA, ¡AYUDA!, ¡VAMOS! y más. En computadora, con la tecla T.': 'In multiplayer tap 💬 to send messages to your group: HI, HELP!, LET\'S GO! and more. On computer, with the T key.', 'YAKUZA': 'YAKUZA', 'Yakuza para el Parlante, con chaleco negro y mangas de camisa. Cuesta 180 monedas.': 'Yakuza for the Speaker, with a black vest and shirt sleeves. Costs 180 coins.', '¡NIVEL': 'LEVEL', 'EXPERIENCIA': 'EXPERIENCE', 'EXPERIENCIA:': 'EXPERIENCE:',
@@ -1889,11 +2032,12 @@ const CHARS = [
   { id: 'bigcam', name: 'CAMARÓGRAFO GRANDE', price: 680, head: .3, size: 1.45, menu: .7, like: 'cam', hp: 7, speed: .85 },
   { id: 'bigspk', name: 'PARLANTE GRANDE', price: 760, head: .3, size: 1.6, menu: .78, like: 'speaker', hp: 7, speed: .85 },
 ];
-// personajes grandes: imagen pixel art (sin skins por ahora)
+// personajes grandes: imagen pixel art (skin 2.0 del camarógrafo grande: por ahora se ve igual)
 const bigSkins = {};
 const BIG_SRC = { bigcam: 'data:image/png;base64,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', bigspk: 'data:image/png;base64,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' };
 for (const [id, url] of Object.entries(BIG_SRC)) { const im = new Image(); im.onload = () => { const U = 8, c = document.createElement('canvas'); c.width = im.width * U; c.height = im.height * U; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0, c.width, c.height); bigSkins[id + '_default'] = c; try { if (custScr.style.display === 'flex') buildChars(); } catch (e) {} }; im.src = url; }
-const BIG_SKINS = { bigcam: [{ id: 'bigcam_default', name: 'PREDETERMINADO', price: 0 }], bigspk: [{ id: 'bigspk_default', name: 'PREDETERMINADO', price: 0 }] };
+const BIG_SKINS = { bigcam: [{ id: 'bigcam_default', name: 'PREDETERMINADO', price: 0 }],   // (skin 2.0 guardada para después: { id: 'bigcam_v2', name: '2.0', price: 280 })
+ bigspk: [{ id: 'bigspk_default', name: 'PREDETERMINADO', price: 0 }] };
 // dónde va el arma (esquina de arriba a la izquierda, respecto a los pies): en los grandes, en su mano
 const HAND = { bigcam: [.84, .77], bigspk: [.86, .78] };
 function gunAt(id) {
@@ -1919,8 +2063,10 @@ try { charSel = localStorage.getItem('skibidi_char') || 'cam'; } catch (err) {}
 if (charSel !== 'cam' && !owned.includes(charSel) && (CHARS.find(c => c.id === charSel) || {}).price !== 0) { charSel = 'cam'; try { localStorage.setItem('skibidi_char', 'cam'); } catch (err) {} }
 function setChar(id) { charSel = id; try { localStorage.setItem('skibidi_char', id); } catch (err) {} }
 const charImg = (id, skin) => BIG_SKINS[id] ? (bigSkins[id + '_default'] || null) : id === 'speaker' ? (spkSkins[skin || 'spk_default'] || null) : id === 'tv' ? (tvSkins[skin || 'tv_default'] || null) : (heroSkins[skin || 'negra'] || null);
-const curSkin = id => BIG_SKINS[id] ? id + '_default' : id === 'cam' ? jacket : id === 'tv' ? tvSkin : spkSkin;     // skin equipada de cada personaje
-const setSkin = (id, skin) => BIG_SKINS[id] ? null : id === 'cam' ? setJacket(skin) : id === 'tv' ? setTvSkin(skin) : setSpkSkin(skin);
+let bigSkinSel = {};                               // skin elegida de cada personaje grande
+try { const o = JSON.parse(localStorage.getItem('skibidi_bigskin') || '{}'); if (o && typeof o === 'object') bigSkinSel = o; } catch (err) {}
+const curSkin = id => BIG_SKINS[id] ? (BIG_SKINS[id].some(k => k.id === bigSkinSel[id]) && (bigSkinSel[id].endsWith('_default') || owned.includes(bigSkinSel[id])) ? bigSkinSel[id] : id + '_default') : id === 'cam' ? jacket : id === 'tv' ? tvSkin : spkSkin;     // skin equipada de cada personaje
+const setSkin = (id, skin) => BIG_SKINS[id] ? (bigSkinSel[id] = skin, (() => { try { localStorage.setItem('skibidi_bigskin', JSON.stringify(bigSkinSel)); } catch (err) {} })()) : id === 'cam' ? setJacket(skin) : id === 'tv' ? setTvSkin(skin) : setSpkSkin(skin);
 const defSkin = id => BIG_SKINS[id] ? id + '_default' : id === 'cam' ? 'negra' : id === 'tv' ? 'tv_default' : 'spk_default';
 const heroImg = () => charImg(charSel, curSkin(charSel));      // personaje y skin equipados (los que se usan al jugar)
 const headFrac = () => (CHARS.find(c => c.id === charSel) || CHARS[0]).head;
@@ -2326,10 +2472,18 @@ const maxLives = () => (CHARS.find(c => c.id === charSel) || {}).hp || MAX_LIVES
 // n = normales, m = minis, b = grandes, r = reforzados, g = reforzado grande, k = jefe
 const WAVES = { 1: { n: 5 }, 2: { n: 7 }, 3: { n: 7, m: 3 }, 4: { n: 10, m: 5 }, 5: { n: 10, m: 5, b: 1 }, 6: { n: 9, m: 5, b: 1 }, 7: { n: 8, m: 5, b: 1, r: 1 }, 8: { n: 7, m: 5, b: 1, r: 2 }, 9: { n: 5, m: 4, b: 2, r: 4 }, 10: { k: 1 },       // oleada 10: solo el jefe
                 11: { n: 5, m: 4, r: 4, b: 2 }, 12: { n: 4, m: 4, r: 5, b: 2 }, 13: { r: 8, m: 3, n: 4, b: 1 }, 14: { r: 6, n: 4, m: 3, b: 1, g: 1 }, 15: { p: 1 } };   // las oleadas grandes ahora tienen 15   // oleada 15: solo la araña
-const waveSize = n => { const w = WAVES[n]; return w ? (w.n || 0) + (w.m || 0) + (w.b || 0) + (w.r || 0) + (w.k || 0) + (w.g || 0) + (w.p || 0) : 0; };
+// CAPÍTULO 2: la misma ciudad, ahora con inodoros voladores (v) y con jetpack (j)
+const WAVES2 = { 1: { n: 4, v: 2 }, 2: { n: 5, v: 3 }, 3: { n: 4, m: 3, j: 2 }, 4: { n: 5, m: 3, v: 3, j: 2 }, 5: { n: 4, m: 4, b: 1, v: 3, j: 2 },
+                 6: { n: 4, m: 4, r: 2, v: 3, j: 2 }, 7: { n: 3, m: 4, r: 2, b: 1, v: 3, j: 3 }, 8: { n: 2, m: 3, r: 3, b: 1, v: 4, j: 3 }, 9: { m: 3, r: 4, b: 2, v: 4, j: 3 },
+                 10: { k: 1, v: 2 }, 11: { n: 3, m: 3, r: 3, b: 2, v: 3, j: 2 }, 12: { m: 3, r: 4, g: 1, b: 1, v: 4, j: 3 }, 13: { r: 5, m: 3, g: 1, v: 4, j: 3 },
+                 14: { r: 5, g: 2, m: 2, v: 4, j: 3 }, 15: { p: 1, v: 2, j: 2 } };   // oleada 15: jefe final (por ahora la araña, hasta que llegue el nuevo)
+const curWaves = () => curChap === 2 ? WAVES2 : WAVES;
+const waveSize = n => { const w = curWaves()[n]; return w ? (w.n || 0) + (w.m || 0) + (w.b || 0) + (w.r || 0) + (w.k || 0) + (w.g || 0) + (w.p || 0) + (w.v || 0) + (w.j || 0) : 0; };
 let wavePlan = [];
 function makePlan(n) {     // lista mezclada de tipos en el orden en que van a salir
-  const w = WAVES[n] || {}, list = [];
+  const w = curWaves()[n] || {}, list = [];
+  for (let i = 0; i < (w.v || 0); i++) list.push('v');
+  for (let i = 0; i < (w.j || 0); i++) list.push('j');
   for (let i = 0; i < (w.n || 0); i++) list.push('n');
   for (let i = 0; i < (w.m || 0); i++) list.push('m');
   for (let i = 0; i < (w.b || 0); i++) list.push('b');
@@ -2377,7 +2531,7 @@ function spawnCrate() {
   for (let tries = 0; tries < 200; tries++) {
     const x = A0 + 30 + Math.random() * (A1 - A0 - 60), y = A0 + 30 + Math.random() * (A1 - A0 - 60);
     if (!canStand(x, y) || hitsVehicle(x, y, 12) || Math.hypot(x - ball.x, y - ball.y) < 50) continue;
-    crates.push({ x, y, hp: 1, flash: 0, open: false, item: Math.random() < .5 ? 'kit' : 'drink', t: 0 });
+    crates.push({ x, y, hp: 1, flash: 0, open: false, item: Math.random() < .75 ? 'kit' : 'drink', t: 0 });   // 75% botiquín, 25% bebida
     return;
   }
 }
@@ -2505,15 +2659,15 @@ function spawnEnemy() {
     { const rr = { m: 5, b: 9, g: 9, k: 12, p: 13 }[wavePlan[spawned]] || 7;      // que aparezca con espacio para su tamaño
       x = Math.max(MIN + rr + 1, Math.min(MAX - rr - 1, x)); y = Math.max(MIN + rr + 1, Math.min(MAX - rr - 1, y));
       if (!enemyFree(x, y, rr)) continue; }
-    const T = wavePlan[spawned], mini = T === 'm', big = T === 'b' || T === 'g', tough = T === 'r' || T === 'g', boss = T === 'k', spider = T === 'p';   // g = reforzado grande
+    const T = wavePlan[spawned], mini = T === 'm', big = T === 'b' || T === 'g', tough = T === 'r' || T === 'g', boss = T === 'k', spider = T === 'p', fly = T === 'v', jet = T === 'j';   // g = reforzado grande
     spawned++;
     recentSpawns.push([x, y]); if (recentSpawns.length > 3) recentSpawns.shift();
     // mini: más chico, muere de un disparo y quita media parte de la barra
     // grande: 5 disparos, quita una parte y media de la barra
     // jefe: 10 disparos (cada 2 se le cae una cabeza), quita 2 partes de la barra
-    enemies.push({ id: ++enemySeq, x, y, r: mini ? 5 : big ? 9 : boss ? 12 : spider ? 13 : 7, speed: spider ? 70 : boss ? 62 : mini ? 58 : (26 + Math.random() * 10 + Math.min(20, elapsed / 6)) * (big ? .5 : 1),   // velocidades fijas: araña 70, jefe de cabezas 62, mini 58 (jugador 70)
+    enemies.push({ id: ++enemySeq, x, y, r: mini ? 5 : big ? 9 : boss ? 12 : spider ? 13 : 7, speed: spider ? 70 : boss ? 62 : mini ? 58 : fly ? 36 : (26 + Math.random() * 10 + Math.min(20, elapsed / 6)) * (big ? .5 : 1),   // velocidades fijas: araña 70, jefe de cabezas 62, mini 58 (jugador 70)
                    hp: mini ? 1 : big && tough ? 6 : big ? 5 : tough ? 3 : boss ? 10 : spider ? 12 : 2, spider, jumpCd: 5, mini, big, tough, boss,
-                   headOrder: boss ? [0, 1, 2, 3, 4].sort(() => Math.random() - .5) : null,
+                   headOrder: boss ? [0, 1, 2, 3, 4].sort(() => Math.random() - .5) : null, fly, jet, chase: fly || undefined, jcd: 3 + Math.random() * 2,
                    flash: 0, ph: Math.random() * 6, skin: tough ? (Math.random() < .35 ? SKIN_RF_BALD : SKIN_RF_HAIR) : pickSkin(!mini && !big) });
     return;
   }
@@ -2773,7 +2927,7 @@ function updateSounds() {
   }
 }
 
-const MAX_CHASERS = 5;
+const MAX_CHASERS = 5, FLY_H = 16, JET_SPEED = 190, JET_T = .5, JET_AIM = .7;   // volador: 16 px en el aire · jetpack: se prepara .7 s y vuela .5 s
 // paseo sin rumbo: elige un punto libre lejos del jugador y camina hacia él; si se traba o llega, elige otro
 function wander(e, dt) {
   e.wtT = (e.wtT || 0) - dt;
@@ -2816,10 +2970,10 @@ function killEnemy(e, dir) {
   const k = enemies.indexOf(e); if (k < 0) return;
   const by = killBy || (NET.exec ? NET.exec.id : NET.me);
   if (!netOn() || by === NET.me) { runCoins += coinsFor(e); msnEv('kill', (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0)); addXp(xpForKill((e.big ? 2 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0))); }
-  corpses.push({ x: e.x, y: e.y, flip: ball.x < e.x, dir, t: 0, skin: e.skin || 0, mini: !!e.mini, big: !!e.big, tough: !!e.tough, boss: !!e.boss, spider: !!e.spider });
+  corpses.push({ x: e.x, y: e.y, flip: ball.x < e.x, dir, t: 0, skin: e.skin || 0, mini: !!e.mini, big: !!e.big, tough: !!e.tough, boss: !!e.boss, spider: !!e.spider, fly: !!e.fly, jet: !!e.jet });
   stopSound(e);
   enemies.splice(k, 1); score++; killed++; drawLives(); drawWave();
-  if (netHost()) netSend({ t: 'kill', id: e.id, x: r1(e.x), y: r1(e.y), dir, f: (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0), sk: e.skin || 0, c: coinsFor(e), by });
+  if (netHost()) netSend({ t: 'kill', id: e.id, x: r1(e.x), y: r1(e.y), dir, f: (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0) | (e.fly ? 32 : 0) | (e.jet ? 64 : 0), sk: e.skin || 0, c: coinsFor(e), by });
   if (killed >= waveSize(wave)) { if (wave >= 15) { if (netHost()) netSend({ t: 'win' }); bossEnding(); } else { waveBreak = WAVE_BREAK; drawWave(); } }
 }
 /* ----- al completar la oleada 15: habla el Jefe Científico Camaraman, la pantalla se pone negra y salen las recompensas ----- */
@@ -2870,25 +3024,29 @@ function chapterHello(mp) {
     } else releaseWave();
   }), 1500);
 }
-// CAPÍTULO 2: por ahora solo la oleada 1, sin enemigos; habla el Jefe Científico Camaraman
+// CAPÍTULO 2: habla el Jefe Científico Camaraman y empiezan las 15 oleadas (con voladores y jetpacks)
 let curChap = 1;
 const CHAP2_TALK = ['¡Estamos bajo ataque! ¡Cuidado, están atacando nuestra nave!', '…'];
-function chapter2Hello() {
+function chapter2Hello(mp) {
   curChap = 2; paused = true; holdSpawn = true; resetJoy(); lastTap = null;
   for (const id of ['joy', 'menuBtn', 'hint']) document.getElementById(id).style.display = 'none';
   showSkillBtns(false); document.getElementById('nade').style.display = 'none';
   const talk = i => {
-    if (i >= CHAP2_TALK.length) {                    // terminó de hablar: te puedes mover (no salen enemigos)
-      paused = false; holdSpawn = true;
+    if (i >= CHAP2_TALK.length) {                    // terminó de hablar: empieza la oleada 1
+      paused = false;
       document.getElementById('joy').style.display = 'flex'; document.getElementById('menuBtn').style.display = 'block';
       document.getElementById('nade').style.display = 'flex'; showSkillBtns(true);
+      if (mp && mpGroup) {
+        mpWaiting = true; document.getElementById('mpWait').textContent = 'ESPERANDO A LOS DEMÁS JUGADORES…'; document.getElementById('mpWait').style.display = 'block';
+        mpGroup.presence({ ready: mpPlayedStart }); mpCheckReady();
+      } else releaseWave();
       return;
     }
     bossSays(CHAP2_TALK[i], () => talk(i + 1));
   };
   setTimeout(() => talk(0), 1500);
 }
-function startChapter2(mp) { startAtWave(1); if (mp) netSpread(); chapter2Hello(); }
+function startChapter2(mp) { curChap = 2; startAtWave(1); if (mp) netSpread(); chapter2Hello(mp); }
 function releaseWave() {
   holdSpawn = false; mpWaiting = false; spawnT = 2;      // parte la oleada: el primer enemigo sale en 2 s
   document.getElementById('mpWait').style.display = 'none';
@@ -2913,7 +3071,7 @@ function bossEnding() {
     c.clearRect(0, 0, cv.width, cv.height);
     if (src) { const k = Math.min(cv.width / src.width, cv.height / src.height); c.imageSmoothingEnabled = false; c.drawImage(src, (cv.width - src.width * k) / 2, cv.height - src.height * k, src.width * k, src.height * k); }
     document.getElementById('story').style.display = 'block';
-    const msg = T('¡Bien! Lo hiciste bien, estamos llegando por ti…'), el = document.getElementById('storyText');
+    const msg = T(curChap === 2 ? '¡Lo lograste! Salvaste nuestra nave… pero esto todavía no termina.' : '¡Bien! Lo hiciste bien, estamos llegando por ti…'), el = document.getElementById('storyText');
     el.textContent = ''; let i = 0;
     const type = setInterval(() => {
       el.textContent = msg.slice(0, ++i);
@@ -3765,14 +3923,14 @@ function drawJumpShadows(cx, cy) {
 function hitPlayer(amount) {
   if (curMate) {                                   // le pegaron a otro jugador del grupo: se le avisa
     if (curMate.down || hurt > 0) return;
-    hurt = 1.2; burst(ball.x, ball.y - 6, 10, ['#ff3b2f', '#e07a1f']);
+    hurt = arenaOn ? ARENA_HURT : 1.2; burst(ball.x, ball.y - 6, 10, ['#ff3b2f', '#e07a1f']);
     netSend({ t: 'hit', a: amount }, curMate.id); return;
   }
   if (over || paused || hurt > 0) return;
   if (chargeSafe > 0) return;                     // EMBESTIDA: 2 s sin recibir daño
   if (blockT > 0) { hurt = .4; floatTexts.push({ x: ball.x, y: ball.y - 30, t: 0, txt: '¡BLOQUEADO!', col: '#9fd2ff' }); return; }   // BLOQUEO: no recibe daño
   msnRun.hurt = true;
-  lives = Math.max(0, lives - amount); hurt = 1.2; drawLives(); shakeScreen(3, .3, true);
+  lives = Math.max(0, lives - amount); hurt = arenaOn ? ARENA_HURT : 1.2; drawLives(); shakeScreen(3, .3, true);
   burst(ball.x, ball.y - 6, 10, ['#ff3b2f', '#e07a1f']);
   if (lives <= 0) { if (netOn()) netGoDown(); else gameOver(); }
   redFlash();
@@ -3862,6 +4020,28 @@ function stepEnemy(e, dt) {
     if (e.stun > 0) { e.stun -= dt; return; }        // BOMBA ATURDIDORA: mareado y quieto
     e.para = !isBossy(e) && anyLight(e);   // LUZ AZUL: paralizado mientras lo toca la luz
     if (e.para) return;
+    if (e.fly) {                                     // VOLADOR: va directo al jugador por encima de todo
+      const sp = e.speed * dt; e.left = ball.x < e.x;
+      if (d > 4) { e.x += (ball.x - e.x) / d * sp; e.y += (ball.y - e.y) / d * sp; }
+      e.x = Math.max(MIN + e.r, Math.min(MAX - e.r, e.x)); e.y = Math.max(MIN + e.r, Math.min(MAX - e.r, e.y));
+      return;
+    }
+    if (e.jet && !over) {                            // JETPACK: se prepara y sale disparado en línea recta
+      if (e.dash) {
+        const sp = JET_SPEED * dt, nx = e.x + e.dash.vx * sp, ny = e.y + e.dash.vy * sp;
+        e.dash.t -= dt;
+        if (e.dash.t <= 0 || !enemyFree(nx, ny, e.r) || nx < MIN + e.r || nx > MAX - e.r || ny < MIN + e.r || ny > MAX - e.r) { e.dash = null; e.jcd = 3.5 + Math.random() * 2; }
+        else { e.x = nx; e.y = ny; }
+        return;
+      }
+      if (e.aim) {
+        e.aim.t -= dt; e.left = e.aim.vx < 0;
+        if (e.aim.t <= 0) { e.dash = { vx: e.aim.vx, vy: e.aim.vy, t: JET_T }; e.aim = null; try { playClick(); } catch (er) {} }
+        return;
+      }
+      e.jcd -= dt;
+      if (e.chase && e.jcd <= 0 && d < 150 && d > 30) { e.aim = { t: JET_AIM, vx: (ball.x - e.x) / d, vy: (ball.y - e.y) / d }; return; }
+    }
     // enemigos que esperan su turno: caminan por ahí hacia puntos al azar, más lento
     if (!e.chase && !over) { wander(e, dt); return; }
     // si un obstáculo tapa el camino, sigue la ruta que lo rodea
@@ -3904,15 +4084,16 @@ function updateEnemies(dt) {
   }
   // como máximo 5 persiguen al jugador; si hay 4 o menos, el que deambula más cerca se suma
   let chasing = 0;
-  for (const e of enemies) if (e.chase) chasing++;
+  for (const e of enemies) if (e.chase && !e.fly) chasing++;
   if (chasing < MAX_CHASERS) {
-    const idle = enemies.filter(e => !e.chase).sort((a, b) => nearDist(a) - nearDist(b));
+    const idle = enemies.filter(e => !e.chase && !e.fly).sort((a, b) => nearDist(a) - nearDist(b));
     for (const e of idle) { if (chasing >= MAX_CHASERS) break; e.chase = true; e.wt = null; chasing++; }
   }
   for (const e of enemies) { swapTo(e); try { stepEnemy(e, dt); } finally { swapBack(); } }   // cada uno va por el jugador más cercano
   // no se encimen entre ellos
   for (let i = 0; i < enemies.length; i++) for (let j = i + 1; j < enemies.length; j++) {
-    const a = enemies[i], b = enemies[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r + b.r + 1;
+    const a = enemies[i], b = enemies[j]; if (a.fly !== b.fly) continue;          // los voladores pasan por encima
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = a.r + b.r + 1;
     if (d < min) { const push = (min - d) / 2, ux = dx / d, uy = dy / d;
       if (enemyFree(a.x - ux * push, a.y - uy * push, a.r)) { a.x -= ux * push; a.y -= uy * push; }
       if (enemyFree(b.x + ux * push, b.y + uy * push, b.r)) { b.x += ux * push; b.y += uy * push; } }
@@ -3923,7 +4104,7 @@ function updateEnemies(dt) {
     for (let k = enemies.length - 1; k >= 0; k--) {
       const e = enemies[k];
       if (e.jump) continue;
-      if (e.boss ? Math.hypot(b.x - e.x, b.y - (e.y - 20)) < 19 : e.spider ? Math.hypot(b.x - e.x, b.y - (e.y - 17)) < 18 : Math.hypot(b.x - e.x, b.y - (e.y - 8 * scaleOf(e))) < e.r + 4) {
+      if (e.boss ? Math.hypot(b.x - e.x, b.y - (e.y - 20)) < 19 : e.spider ? Math.hypot(b.x - e.x, b.y - (e.y - 17)) < 18 : Math.hypot(b.x - e.x, b.y - (e.y - 8 * scaleOf(e) - (e.fly ? FLY_H : 0))) < e.r + 4) {
         bullets.splice(i, 1);
         e.hp--; e.flash = .1;
         if (e.hp <= 0) { killBy = b.own || null; killEnemy(e, b.vx >= 0 ? 1 : -1); killBy = null; }   // cae hacia donde iba la bala
@@ -3939,7 +4120,8 @@ function updateEnemies(dt) {
       hitPlayer(e.mini ? .5 : e.big ? 1.5 : e.boss ? 2 : 1);
       // empuja al enemigo hacia atrás
       const d = Math.hypot(e.x - ball.x, e.y - ball.y) || 1;
-      for (let s = 0; s < 6; s++) { const nx = e.x + (e.x - ball.x) / d * 3, ny = e.y + (e.y - ball.y) / d * 3; if (enemyFree(nx, ny, e.r)) { e.x = nx; e.y = ny; } }
+      if (e.dash) { e.dash = null; e.jcd = 3.5 + Math.random() * 2; }
+      for (let s = 0; s < 6; s++) { const nx = e.x + (e.x - ball.x) / d * 3, ny = e.y + (e.y - ball.y) / d * 3; if (e.fly || enemyFree(nx, ny, e.r)) { e.x = nx; e.y = ny; } }
     }
   } finally { swapBack(); } }
   for (let i = parts.length - 1; i >= 0; i--) {
@@ -3962,13 +4144,37 @@ function drawCorpses(cx, cy, dt) {
     const sk = SKINS[c.skin || 0], sc = scaleOf(c);
     if (c.boss) drawBoss(null, false);
     else if (c.spider) drawSpider(null, false);
-    else g.drawImage(sk.img, -sk.w * sc / 2, -sk.h * sc, sk.w * sc, sk.h * sc);
+    else { if (c.jet) drawJetpack(sk.w * sc, sk.h * sc, 0); g.drawImage(sk.img, -sk.w * sc / 2, -sk.h * sc, sk.w * sc, sk.h * sc); if (c.fly) drawPropeller(sk.h * sc, true); }
     if (c.tough) drawGear(c.skin, sk.w * sc, sk.h * sc, 2, sc);
     g.imageSmoothingEnabled = false;
     g.restore();
   }
 }
 
+// hélice arriba de la cabeza del inodoro volador
+function drawPropeller(h, still) {
+  g.imageSmoothingEnabled = false;
+  const top = Math.round(-h * .86), spin = still ? 1 : Math.abs(Math.cos(t * 28));
+  g.fillStyle = '#2b2b2b'; g.fillRect(-1, top - 4, 2, 5);
+  g.fillStyle = '#e74c3c'; g.fillRect(-2, top - 5, 4, 2);
+  const w = Math.max(2, Math.round(11 * spin));
+  g.fillStyle = still ? '#7f8c8d' : 'rgba(189,195,199,.9)'; g.fillRect(-w, top - 6, w * 2, 2);
+  if (!still) { g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(-11, top - 6, 22, 1); }
+}
+// jetpack en la espalda (la imagen mira a la derecha: la espalda es el lado izquierdo); fuego al prepararse (1) y al volar (2)
+function drawJetpack(w, h, fire) {
+  g.imageSmoothingEnabled = false;
+  const x = Math.round(-w / 2) + 1, y = Math.round(-h * .72), ht = Math.max(8, Math.round(h * .5));
+  g.fillStyle = '#1b1b2f'; g.fillRect(x - 1, y - 1, 7, ht + 2);
+  g.fillStyle = '#7f8c8d'; g.fillRect(x, y, 2, ht); g.fillStyle = '#95a5a6'; g.fillRect(x + 3, y, 2, ht);
+  g.fillStyle = '#e67e22'; g.fillRect(x, y + 2, 5, 1);
+  g.fillStyle = '#34495e'; g.fillRect(x, y + ht, 2, 2); g.fillRect(x + 3, y + ht, 2, 2);
+  if (fire) {
+    const len = (fire === 2 ? 7 : 3) + Math.round(Math.random() * 3);
+    g.fillStyle = '#ff7b00'; g.fillRect(x, y + ht + 2, 2, len); g.fillRect(x + 3, y + ht + 2, 2, len);
+    g.fillStyle = '#ffe14d'; g.fillRect(x, y + ht + 2, 2, Math.ceil(len / 2)); g.fillRect(x + 3, y + ht + 2, 2, Math.ceil(len / 2));
+  }
+}
 function drawEnemies(cx, cy) {
   const list = enemies.slice().sort((a, b) => a.y - b.y);
   for (const e of list) {
@@ -3977,12 +4183,16 @@ function drawEnemies(cx, cy) {
     const sk = SKINS[e.skin || 0], spr = e.flash > 0 ? sk.hit : sk.img, sc = scaleOf(e);
     // la imagen mira a la derecha: se voltea si el jugador está a la izquierda
     const left = e.left ?? ball.x < e.x;
-    const air = e.jump ? Math.sin(Math.PI * Math.min(1, e.jump.t / JUMP_T)) * 55 : 0;     // altura del salto
+    const air = e.jump ? Math.sin(Math.PI * Math.min(1, e.jump.t / JUMP_T)) * 55 : e.fly ? FLY_H + Math.sin(e.ph * .5) * 2 : 0;     // altura del salto (o del vuelo)
     g.save(); g.translate(ex, ey + 3 + (e.boss || e.spider ? 0 : hop) - air); if (left) g.scale(-1, 1);
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     if (e.boss) drawBoss(e.ph, e.flash > 0, e);
     else if (e.spider) drawSpider(e.jump ? null : e.ph, e.flash > 0);
-    else g.drawImage(spr, -sk.w * sc / 2, -sk.h * sc, sk.w * sc, sk.h * sc);
+    else {
+      if (e.jet) drawJetpack(sk.w * sc, sk.h * sc, e.dash ? 2 : e.aim ? 1 : 0);
+      g.drawImage(spr, -sk.w * sc / 2, -sk.h * sc, sk.w * sc, sk.h * sc);
+      if (e.fly) drawPropeller(sk.h * sc);
+    }
     if (e.tough) drawGear(e.skin, sk.w * sc, sk.h * sc, gearStage(e), sc);
     g.imageSmoothingEnabled = true;
     g.imageSmoothingEnabled = false;
@@ -4088,6 +4298,7 @@ function loop(now) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
     if (b.life <= 0 || b.x < MIN - 20 || b.x > MAX + 20 || b.y < MIN - 20 || b.y > MAX + 20 || hitsVehicle(b.x, b.y, 1) || crateHit(b.x, b.y, !b.own || b.own === NET.me)) bullets.splice(i, 1);
   }
+  if (arenaOn && netHost() && !arenaDone) arenaBullets();
   updateEnemies(dt);
   updateGrenades(dt);
   updateSkills(dt);
@@ -4106,6 +4317,7 @@ function loop(now) {
   }
 
   let cx = Math.round(ball.x - VW / 2), cy = Math.round(ball.y - VH / 2);
+  { const sp = arenaOn && over && !arenaDone ? arenaSpecTarget() : null; if (sp) { cx = Math.round(sp.dx - VW / 2); cy = Math.round(sp.dy - VH / 2); } }
   cx = Math.max(0, Math.min(WORLD - VW, cx)); cy = Math.max(0, Math.min(WORLD - VH, cy));
   if (shakeT > 0) {                                // AJUSTES: vibración de pantalla
     shakeT -= dt; const k = shakeT > 0 ? shakeA : 0;
@@ -4234,16 +4446,83 @@ function showModes() {
   modesAnim = requestAnimationFrame(tick);
 }
 function hideModes() { modesEl.style.display = 'none'; cancelAnimationFrame(modesAnim); }
-document.getElementById('play').addEventListener('click', showModes);
-document.getElementById('modesBack').addEventListener('click', () => { hideModes(); document.getElementById('menu').style.display = 'flex'; });
-document.getElementById('modeMulti').addEventListener('click', () => { hideModes(); openMp(); });
+/* ----- JUGAR: botón CAPÍTULOS (mitad solo, mitad multijugador) y otro que llega después ----- */
+const playScr = document.getElementById('playScr');
+let playAnim = 0;
+// ARENA: 3 camarógrafos corren hacia otros 3 (los de enfrente con un rayo en la nuca)
+function drawArena(cv, t, priv) {
+  const c = cv.getContext('2d'), W = cv.width, H = cv.height;
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+  c.fillStyle = '#3b4a51'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#46545a'; c.fillRect(0, 0, W, 34); c.fillRect(0, H - 30, W, 30);
+  c.fillStyle = '#66767c'; c.fillRect(0, 34, W, 4); c.fillRect(0, H - 34, W, 4);
+  c.fillStyle = '#9aa9ae'; for (let x = 0; x < W; x += 40) c.fillRect(x + 10, H / 2 + 10, 20, 4);
+  const src = heroSkins.negra; if (!src) return;
+  const meet = Math.sin(t * 1.6) * 10;                       // se acercan y se alejan un poco
+  const one = (x, y, h, right, ph, bolt) => {
+    const w = h * aspect(src), bob = Math.abs(Math.sin(t * 14 + ph)) * -4;
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(x, y + 2, w * .45, 4, 0, 0, 7); c.fill();
+    c.save(); c.translate(x, y + bob); c.rotate(right ? .12 : -.12); if (!right) c.scale(-1, 1);
+    if (bolt) {                                              // rayo amarillo detrás de la nuca
+      const bx = -w * .55, by = -h * .72, k = h / 52;
+      c.fillStyle = '#000'; c.beginPath(); c.moveTo(bx + 2 * k, by - 15 * k); c.lineTo(bx - 9 * k, by + 1 * k); c.lineTo(bx - 2 * k, by + 1 * k); c.lineTo(bx - 7 * k, by + 15 * k); c.lineTo(bx + 7 * k, by - 3 * k); c.lineTo(bx, by - 3 * k); c.closePath(); c.fill();
+      c.fillStyle = '#ffd60a'; c.beginPath(); c.moveTo(bx + 1 * k, by - 12 * k); c.lineTo(bx - 6 * k, by); c.lineTo(bx - 1 * k, by); c.lineTo(bx - 5 * k, by + 11 * k); c.lineTo(bx + 5 * k, by - 2 * k); c.lineTo(bx, by - 2 * k); c.closePath(); c.fill();
+    }
+    blitChar(c, src, 0, 1, -w / 2, -h, w, h); c.restore();
+  };
+  const c0 = W / 2, L = [[c0 - 120, 104, 0], [c0 - 88, 140, 1.3], [c0 - 116, 158, 2.1]], R = [[c0 + 120, 104, .6], [c0 + 88, 140, 1.9], [c0 + 116, 158, 2.7]];   // equipos cerca del centro
+  for (const [x, y, ph] of L) one(x + meet + Math.sin(t * 2 + ph) * 3, y, 48, true, ph, false);
+  for (const [x, y, ph] of R) one(x - meet - Math.sin(t * 2 + ph) * 3, y, 48, false, ph, true);
+  c.font = 'bold 26px "Press Start 2P", monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillStyle = '#000'; c.fillText('VS', W / 2 + 3, H / 2 + 3); c.fillStyle = '#ff3b2f'; c.fillText('VS', W / 2, H / 2);
+  if (priv) { c.font = '22px sans-serif'; c.fillText('🔒', W - 22, 20); }
+}
+function showPlay() {
+  document.getElementById('menu').style.display = 'none';
+  playScr.style.display = 'flex';
+  const cv = document.getElementById('sceneChaps'), c = cv.getContext('2d'), t0 = performance.now();
+  const half = document.createElement('canvas'); half.width = 320; half.height = 180;
+  cancelAnimationFrame(playAnim);
+  const tick = now => {
+    const t = (now - t0) / 1000;
+    drawScene(half, false, t); c.drawImage(half, 0, 0);          // mitad izquierda: un jugador
+    drawScene(half, true, t); c.drawImage(half, 320, 0);         // mitad derecha: multijugador
+    c.fillStyle = '#1b1b2f'; c.fillRect(318, 0, 4, 180);
+    drawArena(document.getElementById('sceneArena'), t, false);
+    if (playScr.style.display === 'flex') playAnim = requestAnimationFrame(tick);
+  };
+  playAnim = requestAnimationFrame(tick);
+}
+function hidePlay() { playScr.style.display = 'none'; cancelAnimationFrame(playAnim); }
+document.getElementById('play').addEventListener('click', showPlay);
+document.getElementById('playBack').addEventListener('click', () => { hidePlay(); document.getElementById('menu').style.display = 'flex'; });
+document.getElementById('playChaps').addEventListener('click', () => { hidePlay(); showModes(); });
+// pantalla ARENA: JUEGO RÁPIDO y PRIVADO (por ahora solo se muestran)
+const arenaScr = document.getElementById('arenaScr');
+let arenaAnim = 0;
+function showArena() {
+  arenaScr.style.display = 'flex'; document.getElementById('arenaMsg').textContent = '';
+  const a = document.getElementById('sceneQuick'), b = document.getElementById('scenePriv'), t0 = performance.now();
+  cancelAnimationFrame(arenaAnim);
+  const tick = now => { const t = (now - t0) / 1000; drawArena(a, t, false); drawArena(b, t + .7, true); if (arenaScr.style.display === 'flex') arenaAnim = requestAnimationFrame(tick); };
+  arenaAnim = requestAnimationFrame(tick);
+}
+function hideArena() { arenaScr.style.display = 'none'; cancelAnimationFrame(arenaAnim); }
+document.getElementById('playArena').addEventListener('click', () => { hidePlay(); showArena(); });
+document.getElementById('arenaBack').addEventListener('click', () => { hideArena(); showPlay(); });
+document.getElementById('arenaPriv').addEventListener('click', () => { playClick(); hideArena(); mpArenaMode = true; openMp(); });
+document.getElementById('arenaQuick').addEventListener('click', () => { playClick(); aqOpen(); });
+document.getElementById('modesBack').addEventListener('click', () => { hideModes(); showPlay(); });
+document.getElementById('modeMulti').addEventListener('click', () => { hideModes(); mpArenaMode = false; openMp(); });
 
 /* ================= MULTIJUGADOR: GRUPOS =================
    Un jugador crea un grupo y recibe un código de 4 números; los demás lo escriben para unirse (máximo 4).
    Se usa la sala en vivo de Claude: cada jugador comparte su "presencia" (personaje, si es el anfitrión).
    Cuando el anfitrión toca EMPEZAR, todos lo ven al instante. */
 const mpScr = document.getElementById('mpScr');
-const MP_MAX = 4;
+const MP_MAX = 4, ARENA_MAX = 6;
+let mpArenaMode = false;                   // se abrió desde ARENA → PRIVADO (equipo rojo contra azul)
+const mpCap = () => (mpArenaMode || (typeof AQ !== 'undefined' && AQ.found)) ? ARENA_MAX : MP_MAX;
 let mpRoom = null, mpLobby = null, mpUser = null, mpGroup = null, mpCodeTyped = '', mpOffPeers = null, mpIsHost = false, mpHostSeen = false, mpCheckT = 0;
 
 /* ----- Multijugador fuera de Claude (por ejemplo en GitHub Pages): PeerJS (WebRTC) -----
@@ -4312,7 +4591,7 @@ function pjGroup(code, asHost) {
       me = peer.id;
       peer.on('connection', conn => {
         conn.on('open', () => {
-          const full = list().length >= MP_MAX;
+          const full = list().length >= mpCap();
           conns.set(conn.peer, { conn, presence: null, seen: Date.now() });
           try { conn.send({ type: 'state', peers: list() }); } catch (e) {}
           if (full) setTimeout(() => { conns.delete(conn.peer); try { conn.close(); } catch (e) {} }, 1500);
@@ -4364,7 +4643,7 @@ async function mpConnect() {
   return mpLobby;
 }
 function openMp() {
-  mpScr.style.display = 'flex'; mpShow('mpHome');
+  mpScr.style.display = 'flex'; mpShow('mpHome'); mpScr.querySelector('h2').textContent = T(mpArenaMode ? 'ARENA PRIVADA' : 'MULTIJUGADOR');
   const note = document.getElementById('mpNote'); note.textContent = 'Conectando…';
   for (const id of ['mpCreate', 'mpJoinBtn']) document.getElementById(id).disabled = true;
   mpConnect().then(r => {
@@ -4372,12 +4651,13 @@ function openMp() {
     if (ok) dirStart();
     for (const id of ['mpCreate', 'mpJoinBtn']) document.getElementById(id).disabled = !ok;
     note.textContent = !ok ? 'No se pudo conectar al multijugador. Revisa tu internet y vuelve a intentar.'
+                     : mpArenaMode ? 'Crea un grupo y peleen EQUIPO ROJO contra EQUIPO AZUL (hasta 6 jugadores).'
                      : r.peerjs ? 'Juega con hasta 3 amigos. Ellos tienen que abrir este mismo juego en su dispositivo.'
                      : 'Juega con hasta 3 amigos. Ellos también tienen que abrir este juego desde Claude.';
   });
 }
 function mpMyPresence(extra) {
-  return Object.assign({ char: charSel, skin: curSkin(charSel), host: mpIsHost, t: Date.now(), name: userName, lv: myLevel() }, mpIsHost ? { chap: mpChap } : {}, extra || {});
+  return Object.assign({ char: charSel, skin: curSkin(charSel), host: mpIsHost, t: Date.now(), name: userName, lv: myLevel(), uid: myUid }, mpIsHost ? { chap: mpChap, aroom: mpArenaMode ? 1 : 0 } : {}, extra || {});
 }
 async function mpEnter(code, asHost) {
   const msg = document.getElementById(asHost ? 'mpGroupMsg' : 'mpJoinMsg');
@@ -4393,10 +4673,17 @@ async function mpEnter(code, asHost) {
     await new Promise(r => setTimeout(r, 1200));
     const others = mpGroup.peers().filter(p => !p.sameTab);
     if (!others.some(p => p.presence && p.presence.host)) { msg.textContent = 'No existe un grupo con ese código.'; await mpLeave(); return false; }
-    if (others.length >= MP_MAX) { msg.textContent = 'Ese grupo está lleno (máximo 4).'; await mpLeave(); return false; }
+    const hp = others.find(p => p.presence && p.presence.host), cap = AQ.found ? AQ.found.length : (hp.presence.aroom ? ARENA_MAX : MP_MAX);
+    if (others.length >= cap) { msg.textContent = T('Ese grupo está lleno') + ' (' + T('máximo') + ' ' + cap + ').'; await mpLeave(); return false; }
+  }
+  // en la arena privada: entras al equipo que tenga menos jugadores
+  let teamPick = 0;
+  if (!asHost) {
+    const others = mpGroup.peers().filter(p => !p.sameTab), hp = others.find(p => p.presence && p.presence.host);
+    if (hp && hp.presence.aroom) { const n1 = others.filter(p => ((p.presence || {}).team | 0) === 1).length; teamPick = others.length - n1 > n1 ? 1 : 0; }
   }
   if (!asHost) { const h = mpGroup.peers().find(p => p.presence && p.presence.host); mpPlayedStart = (h && h.presence.start) || 0; }   // si ya habían empezado, no se repite la historia
-  await mpGroup.presence(mpMyPresence(!asHost && mpPlayedStart ? { late: mpPlayedStart } : null));
+  await mpGroup.presence(mpMyPresence(Object.assign({ team: teamPick }, !asHost && mpPlayedStart ? { late: mpPlayedStart } : {})));
   if (asHost) mpPlayedStart = 0;
   document.getElementById('mpCode').textContent = code; mpCurCode = code; frPush();
   mpPublic = false; mpDrawPriv();
@@ -4421,8 +4708,10 @@ function mpPlayStart(stamp) {
   mpPlayedStart = stamp;
   if (mpIsHost) dirAnnounce(null);                  // ya empezó: sale de la lista de públicos
   const team = mpSorted().map(p => ({ char: (p.presence || {}).char, skin: (p.presence || {}).skin }));
-  netStart();
   const host = mpGroup.peers().find(p => p.presence && p.presence.host), chap = mpIsHost ? mpChap : ((host && host.presence.chap) | 0) || 1;
+  if (host && host.presence.arena && !AQ.found) arenaTeams = mpSorted().map((p, i) => { const pr = p.presence || {}; return { uid: pr.uid || ('p' + i), name: cleanName(pr.name) || 'JUGADOR', team: (pr.team | 0) === 1 ? 1 : 0 }; });
+  netStart();
+  if (host && host.presence.arena) { startArena(); return; }
   if (chap === 2) { mpScr.style.display = 'none'; startChapter2(true); return; }
   curChap = 1;
   playIntro(() => { mpScr.style.display = 'none'; startAtWave(1); netSpread(); chapterHello(true); }, team);
@@ -4456,8 +4745,15 @@ async function mpRender() {
   const ids = peers.map(p => p.by).filter(Boolean);
   const profs = mpUser && ids.length ? await mpUser.profiles(ids) : {};
   const box = document.getElementById('mpPlayers'); box.innerHTML = '';
-  for (let i = 0; i < MP_MAX; i++) {
-    const p = peers[i], slot = document.createElement('div');
+  const arena = mpIsHost ? mpArenaMode : !!(host && host.presence.aroom);
+  const teamOf = p => (((p.presence || {}).team | 0) === 1 ? 1 : 0);
+  const mineP = peers.find(p => p.sameTab);
+  if (arena && mineP) {                              // si entramos dos a la vez y un equipo quedó con más de 3, el último se cambia
+    const myT = teamOf(mineP), same = peers.filter(p => teamOf(p) === myT);
+    if (same.length > 3 && same.indexOf(mineP) >= 3 && peers.length - same.length < 3) { mpGroup.presence({ team: 1 - myT }); return; }
+  }
+  const makeSlot = (p, i) => {
+    const slot = document.createElement('div');
     slot.className = 'mp-slot' + (p ? (p.sameTab ? ' me' : '') : ' empty');
     const cv = document.createElement('canvas'); cv.width = 120; cv.height = 120;
     const nm = document.createElement('div'); nm.className = 'nm';
@@ -4490,10 +4786,31 @@ async function mpRender() {
       kb.addEventListener('click', () => mpKick(pid(p)));
       slot.append(kb);
     }
-    box.appendChild(slot);
+    return slot;
+  };
+  box.classList.toggle('arena', arena);
+  if (!arena) for (let i = 0; i < MP_MAX; i++) box.appendChild(makeSlot(peers[i], i));
+  else for (const t of [0, 1]) {                    // equipo ROJO y equipo AZUL, hasta 3 cada uno
+    const col = document.createElement('div'); col.className = 'mp-team ' + (t ? 'blue' : 'red');
+    const hd = document.createElement('div'); hd.className = 'mp-team-hd'; hd.textContent = T(t ? 'EQUIPO AZUL' : 'EQUIPO ROJO');
+    const grid = document.createElement('div'); grid.className = 'mp-team-grid';
+    const list = peers.filter(p => teamOf(p) === t), other = peers.length - list.length;
+    for (let k = 0; k < 3; k++) {
+      const p = list[k], slot = makeSlot(p, peers.indexOf(p));
+      if (p && p.sameTab && other < 3) {             // cambiarte al otro lado
+        const sw = document.createElement('button'); sw.className = 'mp-swap'; sw.textContent = t ? '◀ ' + T('ROJO') : T('AZUL') + ' ▶';
+        sw.addEventListener('click', e => { e.stopPropagation(); playClick(); mpGroup.presence({ team: 1 - t }); });
+        slot.append(sw);
+      }
+      grid.appendChild(slot);
+    }
+    col.append(hd, grid); box.appendChild(col);
   }
   if (mpIsHost) mpAnnounceMine(peers.length);
-  document.getElementById('mpPriv').style.display = mpIsHost ? 'block' : 'none';
+  document.getElementById('mpPriv').style.display = mpIsHost && !arena ? 'block' : 'none';
+  document.getElementById('mpChaps').style.display = arena ? 'none' : '';
+  document.getElementById('mpChapLbl').style.display = arena ? 'none' : '';
+  mpScr.querySelector('h2').textContent = T(arena ? 'ARENA PRIVADA' : 'MULTIJUGADOR');
   // capítulo elegido por el anfitrión (por ahora solo existe el 1)
   const chap = mpIsHost ? mpChap : ((host && host.presence.chap) | 0) || 1;
   const cbox = document.getElementById('mpChaps'); cbox.innerHTML = '';
@@ -4501,14 +4818,15 @@ async function mpRender() {
     const b = document.createElement('button'), ok = n === 1;
     b.className = 'mp-chap' + (n === chap ? ' on' : '') + (ok ? '' : ' locked') + (mpIsHost ? '' : ' view');
     b.append(T('CAPÍTULO')); const bn = document.createElement('b'); bn.textContent = n; b.append(bn);
-    if (!ok) { const sm = document.createElement('small'); sm.textContent = T('PRÓXIMAMENTE'); b.append(sm); }
+    if (!ok) { const sm = document.createElement('small'); sm.textContent = T(n === 2 ? 'MUY CERCA' : 'PRÓXIMAMENTE'); b.append(sm); }
     if (mpIsHost && ok) b.addEventListener('click', () => { mpChap = n; mpGroup.presence({ chap: n }); mpRender(); });
     cbox.appendChild(b);
   }
   const start = document.getElementById('mpStart');
   start.style.display = mpIsHost ? 'block' : 'none';
-  start.disabled = peers.length < 2;
-  start.textContent = peers.length < 2 ? 'ESPERANDO JUGADORES…' : 'EMPEZAR';
+  const n1 = peers.filter(p => teamOf(p) === 1).length, ready = arena ? (n1 > 0 && peers.length - n1 > 0) : peers.length >= 2;
+  start.disabled = !ready;
+  start.textContent = T(!ready ? (arena && peers.length >= 2 ? 'FALTA UN EQUIPO' : 'ESPERANDO JUGADORES…') : 'EMPEZAR');
   if (!mpIsHost && !(host && host.presence.start)) document.getElementById('mpGroupMsg').textContent = 'Esperando a que el anfitrión empiece…';
 }
 /* ================= MULTIJUGADOR EN PARTIDA =================
@@ -4545,6 +4863,7 @@ function netStart() {
     if (p.sameTab) continue;
     const pr = p.presence || {}, id = pid(p);
     const m = { id, x: ball.x, y: ball.y, dx: ball.x, dy: ball.y, char: pr.char, skin: pr.skin, down: false, hurt: 0, lightT: 0, tag: cleanName(pr.name) || 'J' + (peers.indexOf(p) + 1) };
+    if (arenaTeams) { const q = arenaTeams.find(a => a.uid === pr.uid) || arenaTeams.find(a => a.name === m.tag); m.team = q ? q.team : -1; }
     if (netHost()) NET.mates.set(id, m); else NET.others.set(id, m);
   }
   NET.offMsg = netListen(netMsg);
@@ -4684,11 +5003,11 @@ function netTick(dt) {
 const r1 = v => Math.round(v * 10) / 10;
 function netSnap() {
   const en = enemies.map(e => [e.id, r1(e.x), r1(e.y),
-    (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0),
+    (e.mini ? 1 : 0) | (e.big ? 2 : 0) | (e.tough ? 4 : 0) | (e.boss ? 8 : 0) | (e.spider ? 16 : 0) | (e.fly ? 32 : 0) | (e.jet ? 64 : 0),
     e.skin || 0, e.hp, (e.left ?? ball.x < e.x) ? 1 : 0, e.stun > 0 ? 1 : 0, e.para ? 1 : 0, e.flash > 0 ? 1 : 0,
     e.jump ? [r1(e.jump.t), r1(e.jump.tx), r1(e.jump.ty)] : 0,
     e.bite ? [e.bite.i, r1(e.bite.t), r1(e.bite.dx), r1(e.bite.dy), e.bite.left ? 1 : 0] : 0,
-    e.slam ? [r1(e.slam.t)] : 0, e.headOrder || 0]);
+    e.slam ? [r1(e.slam.t)] : 0, e.headOrder || 0, e.dash ? 2 : e.aim ? 1 : 0]);
   const pl = [[NET.me, r1(ball.x), r1(ball.y), charSel, curSkin(charSel), over ? (NET.dead ? 2 : 1) : 0, lightT > 0 ? 1 : 0, NET.downW || 0]];
   for (const m of NET.mates.values()) if (!m.gone) pl.push([m.id, r1(m.x), r1(m.y), m.char, m.skin, m.down ? (m.dead ? 2 : 1) : 0, m.lightT > 0 ? 1 : 0, m.downW || 0]);
   const cr = crates.map(c => [r1(c.x), r1(c.y), c.open ? 1 : 0, c.item === 'kit' ? 1 : 0, c.flash > 0 ? 1 : 0]);
@@ -4743,7 +5062,7 @@ function netMsg(from, m) {
   else if (m.t === 'kill') {
     const e = NET.mirror.get(m.id); if (e) { stopSound(e); NET.mirror.delete(m.id); const k = enemies.indexOf(e); if (k >= 0) enemies.splice(k, 1); }
     const f = m.f | 0;
-    corpses.push({ x: m.x, y: m.y, flip: ball.x < m.x, dir: m.dir, t: 0, skin: m.sk || 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16) });
+    corpses.push({ x: m.x, y: m.y, flip: ball.x < m.x, dir: m.dir, t: 0, skin: m.sk || 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16), fly: !!(f & 32), jet: !!(f & 64) });
     if (m.by === NET.me) { runCoins += +m.c || 0; msnEv('kill', m.f | 0); addXp(xpForKill(m.f | 0)); }     // solo los que elimino yo
     score++; drawLives();
   } else if (m.t === 'hit') { hitPlayer(+m.a || 1, true); }
@@ -4759,7 +5078,8 @@ function netMsg(from, m) {
   } else if (m.t === 'revive') netRevived(m.kit);
   else if (m.t === 'win') { if (!storyOn) bossEnding(); }
   else if (m.t === 'chat') { if (m.id !== NET.me && Number.isInteger(m.i)) showChat(m.id || NET.hostId, m.i, String(m.n || '').slice(0, 16)); }
-  else if (m.t === 'over') netTeamOver();
+  else if (m.t === 'over') { if (!arenaOn) netTeamOver(); }
+  else if (m.t === 'awin') { if (arenaOn) arenaEnd(m.w === 0 || m.w === 1 ? m.w : -1); }
 }
 // invitado: copia lo que mandó el anfitrión
 function netApplySnap(m) {
@@ -4769,16 +5089,16 @@ function netApplySnap(m) {
   drawWave();
   const seen = new Set();
   for (const a of m.en || []) {
-    const [id, x, y, f, sk, hp, left, st, para, fl, jump, bite, slam, heads] = a;
+    const [id, x, y, f, sk, hp, left, st, para, fl, jump, bite, slam, heads, jst] = a;
     seen.add(id);
     let e = NET.mirror.get(id);
     if (!e) {
-      e = { id, x, y, ph: Math.random() * 6, flash: 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16) };
+      e = { id, x, y, ph: Math.random() * 6, flash: 0, mini: !!(f & 1), big: !!(f & 2), tough: !!(f & 4), boss: !!(f & 8), spider: !!(f & 16), fly: !!(f & 32), jet: !!(f & 64) };
       e.r = e.mini ? 5 : e.big ? 9 : e.boss ? 12 : e.spider ? 13 : 7;
       NET.mirror.set(id, e); enemies.push(e);
     }
     e.tx = x; e.ty = y; e.skin = sk; e.hp = hp; e.left = !!left; e.stun = st ? 1 : 0; e.para = !!para; if (fl) e.flash = .1;
-    e.headOrder = heads || null;
+    e.headOrder = heads || null; e.dash = jst === 2 ? {} : null; e.aim = jst === 1 ? {} : null;
     e.jump = jump ? { t: jump[0], tx: jump[1], ty: jump[2] } : null;
     e.bite = bite ? { i: bite[0], t: bite[1], dx: bite[2], dy: bite[3], left: !!bite[4] } : null;
     e.slam = slam ? { t: slam[0] } : null;
@@ -4814,9 +5134,10 @@ function netClientEnemies(dt) {
   // mis balas desaparecen al tocar a un enemigo (el daño lo cuenta el anfitrión)
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
+    if (arenaOn && [...NET.others.values()].some(o => !o.down && !o.gone && o.team !== arenaMyTeam() && Math.hypot(b.x - o.dx, b.y - (o.dy - 8)) < ARENA_HIT_R)) { bullets.splice(i, 1); continue; }
     for (const e of enemies) {
       if (e.jump) continue;
-      if (e.boss ? Math.hypot(b.x - e.x, b.y - (e.y - 20)) < 19 : e.spider ? Math.hypot(b.x - e.x, b.y - (e.y - 17)) < 18 : Math.hypot(b.x - e.x, b.y - (e.y - 8 * scaleOf(e))) < e.r + 4) { bullets.splice(i, 1); e.flash = .1; break; }
+      if (e.boss ? Math.hypot(b.x - e.x, b.y - (e.y - 20)) < 19 : e.spider ? Math.hypot(b.x - e.x, b.y - (e.y - 17)) < 18 : Math.hypot(b.x - e.x, b.y - (e.y - 8 * scaleOf(e) - (e.fly ? FLY_H : 0))) < e.r + 4) { bullets.splice(i, 1); e.flash = .1; break; }
     }
   }
   for (const b of NET.bul) { b.x += b.vx * dt; b.y += b.vy * dt; }
@@ -4831,7 +5152,8 @@ function netGoDown() {
   over = true; setNade(false); deadT = 0; hurt = 0; resetJoy();
   showSkillBtns(false); document.getElementById('nade').style.display = 'none'; document.getElementById('joy').style.display = 'none';
   NET.downW = 0; netWaitText();
-  document.getElementById('mpWait').style.display = 'block';
+  document.getElementById('mpWait').style.display = arenaOn ? 'none' : 'block';
+  if (arenaOn) { arenaSpecI = 0; floatTexts.push({ x: ball.x, y: ball.y - 26, t: 0, txt: '¡ELIMINADO!', col: '#ff6b5e' }); }
   if (netClient()) netSend({ t: 'down' }); else netCheckOver();
 }
 /* ----- caído: aguantas hasta 2 cambios de oleada; si nadie te revive, mueres ----- */
@@ -4858,7 +5180,7 @@ function netWaveDownTick() {                       // (anfitrión) cambió la ol
 const REVIVE_T = 3, REVIVE_R = 16;
 // el compañero caído más cercano que tengo al lado (o null)
 function netDownNear() {
-  if (!netOn() || over) return null;
+  if (!netOn() || over || arenaOn) return null;
   let tgt = null, bd = 1e9;
   for (const m of (netHost() ? NET.mates : NET.others).values()) {
     if (!m.down || m.gone || m.dead) continue;
@@ -4899,6 +5221,7 @@ function netRevived(kit) {
   burst(ball.x, ball.y - 8, 14, ['#7dff9a', '#2ecc71', '#ffffff']); playClick();
 }
 function netCheckOver() {
+  if (arenaOn) { arenaCheck(); return; }
   if (!netHost() || !over) return;
   for (const m of NET.mates.values()) if (!m.down) return;
   netSend({ t: 'over' }); netTeamOver();
@@ -4937,7 +5260,7 @@ function drawMates(cx, cy) {
       g.fillStyle = '#000'; g.fillRect(px - 12, py - 32, 24, 4); g.fillStyle = '#2ecc71'; g.fillRect(px - 11, py - 31, 22 * k, 2);
     }
     g.font = 'bold 5px monospace'; g.textAlign = 'center';
-    g.fillStyle = '#000'; g.fillText(m.tag, px + .6, py - 22 + .6); g.fillStyle = m.dead ? '#ff6b5e' : m.down ? '#9aa4ab' : '#5ec8ff'; g.fillText(m.dead ? m.tag + ' ✝' : m.tag, px, py - 22);
+    g.fillStyle = '#000'; g.fillText(m.tag, px + .6, py - 22 + .6); const tm = arenaOn ? (m.team ?? arenaTeamOf(m.tag)) : -1; g.fillStyle = m.dead ? '#ff6b5e' : m.down ? '#9aa4ab' : tm === 0 ? '#ff5a4e' : tm === 1 ? '#5aa9ff' : '#5ec8ff'; g.fillText(m.dead ? m.tag + ' ✝' : m.tag, px, py - 22);
     g.textAlign = 'left';
   }
 }
@@ -4958,8 +5281,14 @@ const dirFire = () => { for (const f of DIR.subs) { try { f(DIR.list); } catch (
 // jugador conectado (para amigos): { uid, name, code, st, reqs, accs }
 const uidOk = u => typeof u === 'string' && /^u[a-z0-9]{6,20}$/.test(u);
 const plOk = q => q && typeof q === 'object' && uidOk(q.uid) && typeof q.name === 'string' && q.name.length <= 16 && (q.code === '' || /^\d{4}$/.test(String(q.code)))
-  && (!q.reqs || (Array.isArray(q.reqs) && q.reqs.length <= 30 && q.reqs.every(uidOk))) && (!q.accs || (Array.isArray(q.accs) && q.accs.length <= 30 && q.accs.every(uidOk)));
+  && (!q.reqs || (Array.isArray(q.reqs) && q.reqs.length <= 30 && q.reqs.every(uidOk))) && (!q.accs || (Array.isArray(q.accs) && q.accs.length <= 30 && q.accs.every(uidOk)))
+  && (!q.inv || (Array.isArray(q.inv) && q.inv.length <= 8 && q.inv.every(v => v && uidOk(v.u) && /^\d{4}$/.test(String(v.c)) && typeof v.t === 'number')))
+  && (!q.ow || (Array.isArray(q.ow) && q.ow.length <= 40 && q.ow.every(pfKnown))) && (!q.ch || CHARS.some(c => c.id === q.ch)) && (!q.sk || pfKnown(q.sk))
+  && (!q.aq || ([1, 2, 3].includes(q.aq) && typeof q.aqt === 'number' && (!q.aqc || CHARS.some(c => c.id === q.aqc))));
 function dirServerPlayers() { const out = []; if (DIR.meP) out.push(DIR.meP); for (const q of DIR.players.values()) if (q) out.push(q); return out; }
+// PERFIL: qué personajes y skins tiene cada jugador (solo ids conocidos)
+const pfKnown = id => typeof id === 'string' && id.length <= 20 && (CHARS.some(c => c.id === id) || CHARS.some(c => skinsOf(c.id).some(k => k.id === id)));
+const pfMine = () => { const out = []; for (const c of CHARS) { if (charOwned(c.id)) out.push(c.id); for (const k of skinsOf(c.id)) if (k.price > 0 && owned.includes(k.id)) out.push(k.id); } return out.slice(0, 40); };
 const pubOk = g => g && typeof g === 'object' && /^\d{4}$/.test(String(g.code)) && typeof g.n === 'number';
 function dirServerList() {
   const out = []; if (DIR.mine) out.push(DIR.mine);
@@ -5098,20 +5427,21 @@ document.getElementById('mpPrivBtn').addEventListener('click', () => { playClick
 document.getElementById('mpPrev').addEventListener('click', () => { mpPubPage--; drawPubList(); });
 document.getElementById('mpNext').addEventListener('click', () => { mpPubPage++; drawPubList(); });
 document.getElementById('mpJoinBtn').addEventListener('click', () => {
-  mpPubPage = 0; mpJoinView(false); drawPubList();
+  mpPubPage = 0; mpJoinView(mpArenaMode); drawPubList();
   mpCodeTyped = ''; document.getElementById('mpCodeIn').textContent = '____'; document.getElementById('mpJoinMsg').textContent = '';
   mpShow('mpJoin');
 });
 document.getElementById('mpStart').addEventListener('click', async () => {
   if (!mpGroup || !mpIsHost) return;
   const stamp = Date.now();
-  await mpGroup.presence({ start: stamp });
+  await mpGroup.presence(mpArenaMode ? { start: stamp, arena: 1 } : { start: stamp });
   mpPlayStart(stamp);
 });
 document.getElementById('mpBack').addEventListener('click', async () => {
-  if (document.getElementById('mpJoin').style.display === 'flex') { if (document.getElementById('mpCodeView').style.display === 'flex') mpJoinView(false); else mpShow('mpHome'); return; }
-  if (mpGroup) { await mpLeave(); mpShow('mpHome'); return; }          // salir del grupo
-  mpScr.style.display = 'none'; showModes();
+  if (document.getElementById('mpJoin').style.display === 'flex') { if (document.getElementById('mpCodeView').style.display === 'flex' && !mpArenaMode) mpJoinView(false); else mpShow('mpHome'); return; }
+  if (mpGroup) { await mpLeave(); mpShow('mpHome'); mpScr.querySelector('h2').textContent = T(mpArenaMode ? 'ARENA PRIVADA' : 'MULTIJUGADOR'); return; }          // salir del grupo
+  mpScr.style.display = 'none';
+  if (mpArenaMode) { mpArenaMode = false; showArena(); } else showModes();
 });
 // AJUSTES (por ahora: próximamente)
 const openScr = id => { document.getElementById('menu').style.display = 'none'; document.getElementById(id).style.display = 'flex'; };
@@ -5155,7 +5485,7 @@ function drawBustOn(cv, src) {
   blitChar(c, src, 0, .62, cv.width / 2 - bw / 2, 6 + (src.padT || 0) * k, bw, sh * k);
 }
 const skinsOf = id => BIG_SKINS[id] ? BIG_SKINS[id] : id === 'cam' ? JACKETS : id === 'tv' ? TV_SKINS : SPK_SKINS;
-const isOwned = id => !id || owned.includes(id) || id === 'spk_default' || id === 'tv_default';
+const isOwned = id => !id || owned.includes(id) || id === 'spk_default' || id === 'tv_default' || /_default$/.test(id);
 const charOwned = id => (CHARS.find(c => c.id === id) || {}).price === 0 || owned.includes(id);
 function buildChars() {
   const row = document.getElementById('charRow'); row.innerHTML = '';
@@ -5298,9 +5628,54 @@ function showCharPicker() {            // vuelve a la lista de los 3 personajes
   document.getElementById('charRow').style.display = 'flex';
   buildChars();
 }
+// arriba del cuadrado: PERSONAJES / ARMAS (armas: por ahora vacío)
+// ARMAS: por ahora solo la pistola (la de siempre), equipada desde el inicio
+// las demás: por ahora gratis y sin usarse todavía (solo aparecen); el precio queda guardado para después
+const WEAPON_SRC = { rifle: 'data:image/png;base64,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',
+  escopeta: 'data:image/png;base64,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',
+  lanzacohetes: 'data:image/png;base64,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' };
+const weaponImgs = {};
+for (const [id, url] of Object.entries(WEAPON_SRC)) { const im = new Image(); im.onload = () => { weaponImgs[id] = im; try { if (document.getElementById('custGuns').style.display === 'flex') buildGuns(); } catch (e) {} }; im.src = url; }
+const WEAPONS = [{ id: 'pistola', name: 'PISTOLA', img: () => GUN },
+  { id: 'rifle', name: 'RIFLE DE ASALTO', price: 460, soon: true, img: () => weaponImgs.rifle },
+  { id: 'escopeta', name: 'ESCOPETA', price: 580, soon: true, img: () => weaponImgs.escopeta },
+  { id: 'lanzacohetes', name: 'LANZACOHETES', price: 740, soon: true, img: () => weaponImgs.lanzacohetes }];
+let weaponSel = 'pistola';
+function buildGuns() {
+  const box = document.getElementById('custGuns'); box.innerHTML = '';
+  const msg = document.createElement('div'); msg.id = 'gunMsg'; msg.className = 'gun-msg';
+  for (const w of WEAPONS) {
+    const b = document.createElement('button'); b.className = 'bust' + (weaponSel === w.id ? ' on' : '');
+    const cv = document.createElement('canvas'); cv.width = 180; cv.height = 180;
+    const c = cv.getContext('2d'), im = w.img();
+    c.fillStyle = '#3a4046'; c.fillRect(0, 0, 180, 180);
+    if (im) { const k = Math.min(150 / im.width, 110 / im.height); c.imageSmoothingEnabled = !!w.soon; c.imageSmoothingQuality = 'high'; c.drawImage(im, 90 - im.width * k / 2, 80 - im.height * k / 2, im.width * k, im.height * k); }
+    const tag = document.createElement('div'); tag.className = 'tag'; tag.textContent = T(w.name);
+    b.append(cv, tag);
+    if (weaponSel === w.id) { const e = document.createElement('div'); e.className = 'eqb'; e.textContent = T('EQUIPADA'); b.appendChild(e); }
+    if (w.soon) { const e = document.createElement('div'); e.className = 'eqb free'; e.innerHTML = '<s>● ' + w.price + '</s> ' + T('GRATIS'); b.appendChild(e); }
+    b.addEventListener('click', () => {
+      playClick();
+      if (w.soon) { b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); document.getElementById('gunMsg').textContent = T('¡TODAVÍA NO SE PUEDE USAR!'); return; }
+      weaponSel = w.id; buildGuns();
+    });
+    box.appendChild(b);
+  }
+  box.appendChild(msg);
+}
+const GUNS_SOON = true;                            // ARMAS: por ahora solo dice PRÓXIMAMENTE (las armas ya están hechas en buildGuns)
+function custSection(guns) {
+  if (guns && GUNS_SOON) document.getElementById('custGuns').innerHTML = '<div class="cust-soon" style="display:block;flex:1">' + T('PRÓXIMAMENTE') + '</div>';
+  else if (guns) buildGuns();
+  document.getElementById('secChars').classList.toggle('on', !guns); document.getElementById('secGuns').classList.toggle('on', guns);
+  document.getElementById('custChars').style.display = guns ? 'none' : 'contents';
+  document.getElementById('custGuns').style.display = guns ? 'flex' : 'none';
+}
+document.getElementById('secChars').addEventListener('click', () => { playClick(); custSection(false); });
+document.getElementById('secGuns').addEventListener('click', () => { playClick(); custSection(true); });
 document.getElementById('charBack').addEventListener('click', () => { confirmBuy = false; showCharPicker(); drawActions(); });
 document.getElementById('custBtn').addEventListener('click', () => {
-  document.getElementById('menu').style.display = 'none'; custScr.style.display = 'flex'; sizePreview(); drawCoins();
+  document.getElementById('menu').style.display = 'none'; custScr.style.display = 'flex'; custSection(false); sizePreview(); drawCoins();
   pv = { char: charSel, skin: curSkin(charSel), kind: 'char' }; confirmBuy = false;
   showCharPicker();
   drawActions();
@@ -5320,7 +5695,7 @@ document.getElementById('modeSolo').addEventListener('click', () => { hideModes(
 document.getElementById('chaptersBack').addEventListener('click', () => { chaptersEl.style.display = 'none'; showModes(); });
 // el capítulo 1 siempre empieza desde la oleada 1
 document.getElementById('chap1').addEventListener('click', () => { curChap = 1; chaptersEl.style.display = 'none'; playIntro(() => { startAtWave(1); chapterHello(false); }); });
-// (capítulo 2: llega en la próxima actualización; su inicio ya está listo en startChapter2)
+// (capítulo 2: ya está hecho pero bloqueado — MUY CERCA; para abrirlo: quitar 'locked' y volver a llamar startChapter2(false))
 
 /* ----- HISTORIA DEL INICIO: páginas que se pasan con la flecha (o SALTAR) ----- */
 const introEl = document.getElementById('intro'), introCv = document.getElementById('introCv');
@@ -5503,6 +5878,7 @@ function startAtWave(n) {
 
 let practice = false;                            // true = partida empezada desde IR A OLEADA (sin monedas)
 function startGame() {
+  setTimeout(() => { try { frPush(); } catch (e) {} }, 50);
   practice = false;
   initAudio();
   document.getElementById('menu').style.display = 'none';
@@ -5535,7 +5911,7 @@ Object.keys(WAVES).forEach(n => {
   b.addEventListener('click', () => {
     // empieza una partida nueva directamente en la oleada elegida
     dbgPanel.style.display = 'none';
-    startGame(); practice = true;                 // partida de prueba: no da monedas
+    curChap = 1; startGame(); practice = true;                 // partida de prueba: no da monedas
     wave = +n; spawned = 0; killed = 0; wavePlan = []; waveBreak = 0; drawWave(); cratePlan = {}; onWaveStart();
   });
   dbgWaves.appendChild(b);
@@ -5568,6 +5944,9 @@ document.getElementById('yesBtn').addEventListener('click', () => {
 });
 document.getElementById('rwMenu').addEventListener('click', () => goMenu());
 function goMenu() {
+  if (arenaOn) { arenaOn = false; arenaTeams = null; AQ.found = null; document.getElementById('arenaCd').style.display = 'none'; }
+  arenaDone = false; for (const id of ['arSpec', 'arWin']) document.getElementById(id).style.display = 'none';
+  setTimeout(() => { try { frPush(); } catch (e) {} }, 50);
   musicStop();
   // vuelve al menú principal; la partida se reinicia
   netStop();
@@ -5686,37 +6065,26 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.4.02';
-const NEWS_VER = '1.4';                // 1.4.0x son parches: el aviso sigue siendo el de la 1.4
-/* ----- contador para la 1.5 (hora de Chile, UTC-3) ----- */
-const CD_FROM = Date.parse('2026-10-26T21:40:00-03:00'), CD_TO = Date.parse('2026-10-28T16:30:00-03:00');
-function cdTick() {
-  const now = Date.now(), el = document.getElementById('cdTime'); if (!el) return;
-  if (now < CD_FROM || now >= CD_TO) { el.style.display = 'none'; return; }
-  el.style.display = 'block';
-  const t = Math.ceil((CD_TO - now) / 1000), pad = n => String(n).padStart(2, '0');
-  el.textContent = pad(Math.floor(t / 3600)) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
-}
-setTimeout(() => { cdTick(); setInterval(cdTick, 1000); }, 0);
+const GAME_VERSION = '1.5';
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
-  ['PERSONAJES NUEVOS:', 'Llegan el Camarógrafo Grande (680 monedas) y el Parlante Grande (760 monedas). Búscalos en PERSONAJES.'],
-  ['CAMARÓGRAFO GRANDE:', '7 de vida, un poco más lento y 3 habilidades nuevas: Puñetazo potente, Bloqueo y Pisotón.'],
-  ['PARLANTE GRANDE:', '7 de vida, un poco más lento y 3 habilidades nuevas: Onda sonora, Embestida y Patada poderosa.'],
-  ['NIVEL DE JUGADOR:', 'Ganas experiencia (XP) eliminando inodoros, pasando oleadas, ganando y con las misiones. Tu nivel sale al lado de tu nombre.'],
-  ['MENSAJES RÁPIDOS:', 'En multijugador toca 💬 para mandar mensajes a tu grupo: HOLA, ¡AYUDA!, ¡VAMOS! y más. En computadora, con la tecla T.'],
-  ['CONTROLES DE COMPUTADORA:', 'Al abrir el juego eliges si juegas en celular o computadora. En computadora: mantén el clic para disparar, habilidades con 1 2 3 (o Q E R), F y G para el inventario y ESC para pausar.'],
-  ['SKIN NUEVA:', 'Yakuza para el Parlante, con chaleco negro y mangas de camisa. Cuesta 180 monedas.'],
-  ['OTROS CAMBIOS:', 'Salen 3 cajas cada 5 oleadas, la oleada 13 ya no tiene al jefe de muchas cabezas y los nombres pueden tener hasta 16 letras.'],
+  ['¡LLEGA LA ARENA!:', 'En JUGAR ahora eliges entre CAPÍTULOS y ARENA. En la Arena peleas EQUIPO ROJO contra EQUIPO AZUL.'],
+  ['JUEGO RÁPIDO:', 'Elige 1 VS 1, 2 VS 2 o 3 VS 3 y el juego busca jugadores. Cada equipo aparece en su lado del mapa y… 3, 2, 1… ¡YA!'],
+  ['ARENA PRIVADA:', 'Crea un grupo con código para jugar con tus amigos (hasta 6) y cámbiate entre el equipo rojo y el azul.'],
+  ['LA PELEA:', 'Tus balas dañan al otro equipo. Si te eliminan, miras la pantalla de tus compañeros. El equipo que elimina a todos los del otro gana y cada ganador recibe 60 monedas.'],
+  ['INVITAR AMIGOS:', 'Desde tu grupo toca 👥 INVITAR AMIGOS y a tu amigo le llega la invitación. Los amigos que están en una partida salen como JUGANDO.'],
+  ['PERFIL DE AMIGOS:', 'En AMIGOS toca a un amigo para ver su nombre, su nivel y los personajes y skins que tiene.'],
+  ['CAJAS:', 'Ahora dan botiquín más seguido (75%) y bebida de velocidad el resto (25%).'],
+  ['CAPÍTULO 2:', '¡Ya está MUY CERCA!'],
 ];
 document.querySelector('.ver').textContent = 'VERSIÓN ' + GAME_VERSION;
 try {
   const seen = localStorage.getItem('skibidi_seenver');
   const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
   // si ya habías jugado con otra versión: aviso al abrir
-  if (played && !String(seen || '').startsWith(NEWS_VER)) {   // los parches 1.4.0x no repiten el aviso de la 1.4
-    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + NEWS_VER;
-    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + NEWS_VER + ' TRAE:';
+  if (played && seen !== GAME_VERSION) {
+    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + GAME_VERSION;
+    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + GAME_VERSION + ' TRAE:';
     const ul = document.getElementById('updList');
     for (const [tt, tx] of NEWS) { const li = document.createElement('li'), b = document.createElement('b'); b.textContent = tt; li.append(b, ' ', tx); ul.appendChild(li); }
     document.getElementById('updScr').style.display = 'flex';
@@ -5790,10 +6158,208 @@ FR.friends = FR.friends.filter(f => f && uidOk(f.uid)); FR.rej = FR.rej.filter(u
 const frSave = () => { try { localStorage.setItem('skibidi_friends', JSON.stringify(FR)); } catch (e) {} };
 const frIsFriend = u => FR.friends.some(f => f.uid === u);
 const frOnline = () => { const m = new Map(); for (const q of DIR.plist || []) if (q && q.uid !== myUid) m.set(q.uid, q); return m; };
+/* ----- ARENA · JUEGO RÁPIDO: cada uno se anota en el tablero con el modo que busca (1, 2 o 3 por equipo) ----- */
+const AQ = { n: 0, t: 0, found: null, timer: 0 };
+const aqScr = document.getElementById('aqScr');
+const aqView = id => { for (const b of ['aqPick', 'aqWait', 'aqFound']) document.getElementById(b).style.display = b === id ? 'flex' : 'none'; };
+function aqAll() {                                 // todos los que están buscando (yo incluido)
+  const m = new Map();
+  for (const q of DIR.plist || []) if (q && q.aq) m.set(q.uid, q);
+  if (AQ.n) m.set(myUid, { uid: myUid, name: userName, aq: AQ.n, aqt: AQ.t, aqc: charSel, aqs: curSkin(charSel) });
+  return [...m.values()];
+}
+function aqOpen() {
+  if (!userName) return;
+  mpConnect().then(r => { if (r) { dirStart(); frPush(); } }).catch(() => {});
+  aqScr.style.display = 'flex'; aqView('aqPick'); aqDraw();
+}
+function aqStart(n) {
+  AQ.n = n; AQ.t = Date.now(); AQ.found = null; frPush(); playClick();
+  aqView('aqWait'); document.getElementById('aqTitle').textContent = n + ' VS ' + n; aqDraw();
+  clearInterval(AQ.timer); let k = 0;
+  AQ.timer = setInterval(() => { k = (k + 1) % 4; document.getElementById('aqDots').textContent = T('BUSCANDO JUGADORES') + '.'.repeat(k); aqDraw(); }, 500);
+}
+function aqStop() { AQ.n = 0; AQ.t = 0; clearInterval(AQ.timer); frPush(); }
+function aqDraw() {
+  const all = aqAll();
+  for (const n of [1, 2, 3]) { const c = all.filter(q => q.aq === n).length; document.getElementById('aqC' + n).textContent = c ? c + ' ' + T('BUSCANDO') : ''; }
+  if (!AQ.n || AQ.found) return;
+  const need = AQ.n * 2, list = all.filter(q => q.aq === AQ.n).sort((a, b) => a.aqt - b.aqt || (a.uid < b.uid ? -1 : 1));
+  const idx = list.findIndex(q => q.uid === myUid), start = Math.floor(idx / need) * need, mine = list.slice(start, start + need);
+  document.getElementById('aqCount').textContent = mine.length + ' / ' + need;
+  const left = need - mine.length;
+  document.getElementById('aqHint').textContent = left > 0 ? T('FALTAN') + ' ' + left + ' ' + T(left === 1 ? 'JUGADOR' : 'JUGADORES') : '';
+  if (mine.length === need) {                      // ¡se juntaron todos!
+    AQ.found = mine; clearInterval(AQ.timer);
+    const box = document.getElementById('aqTeams'); box.innerHTML = '';
+    for (const [team, cls, lbl] of [[0, 'red', 'EQUIPO ROJO'], [1, 'blue', 'EQUIPO AZUL']]) {
+      const d = document.createElement('div'); d.className = 'aq-team ' + cls; const h = document.createElement('b'); h.textContent = T(lbl); d.appendChild(h);
+      mine.forEach((q, i) => {
+        if (i % 2 !== team) return;
+        const ch = CHARS.find(c => c.id === q.aqc) || CHARS[0], card = document.createElement('div'); card.className = 'aq-pl' + (q.uid === myUid ? ' me' : '');
+        const cv = document.createElement('canvas'); cv.width = 90; cv.height = 90; drawBustOn(cv, charImg(ch.id, typeof q.aqs === 'string' ? q.aqs : null));
+        const cn = document.createElement('div'); cn.className = 'cn'; cn.textContent = T(ch.name);
+        const un = document.createElement('small'); un.textContent = q.name + (q.uid === myUid ? ' ' + T('(TÚ)') : '');
+        card.append(cv, cn, un); d.appendChild(card);
+      });
+      box.appendChild(d);
+    }
+    aqView('aqFound'); try { playClick(); } catch (e) {}
+    document.getElementById('aqFoundMsg').textContent = T('ENTRANDO A LA ARENA…');
+    setTimeout(() => { if (AQ.found === mine) aqLaunch(mine); }, 3000);
+  }
+}
+let arenaOn = false, arenaTeams = null;
+const aqCode = list => { let h = 7; for (const ch of list[0].uid + ':' + list[0].aqt) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return String(1000 + h % 9000); };
+async function aqLaunch(list) {
+  aqStop();
+  const code = aqCode(list), lead = list[0].uid === myUid;
+  arenaTeams = list.map((q, i) => ({ uid: q.uid, name: q.name, team: i % 2 }));
+  if (!(await mpConnect())) { document.getElementById('aqFoundMsg').textContent = T('No se pudo conectar. Intenta de nuevo.'); return; }
+  if (mpGroup) await mpLeave();
+  mpChap = 1;
+  if (lead) {
+    if (!(await mpEnter(code, true))) { document.getElementById('aqFoundMsg').textContent = T('No se pudo conectar. Intenta de nuevo.'); return; }
+    const t0 = Date.now();
+    const wait = setInterval(async () => {          // espera a que entren todos y parte
+      if (!mpGroup) { clearInterval(wait); return; }
+      if (mpGroup.peers().length >= list.length || Date.now() - t0 > 20000) {
+        clearInterval(wait);
+        if (mpGroup.peers().length < 2) { document.getElementById('aqFoundMsg').textContent = T('Los demás no llegaron. Intenta de nuevo.'); await mpLeave(); return; }
+        const stamp = Date.now(); await mpGroup.presence({ start: stamp, arena: 1 }); mpPlayStart(stamp);
+      }
+    }, 500);
+  } else {
+    for (let k = 0; k < 8; k++) {                  // el grupo puede tardar un poco en existir
+      await new Promise(r => setTimeout(r, 1200));
+      if (await mpEnter(code, false)) return;
+    }
+    document.getElementById('aqFoundMsg').textContent = T('No se pudo conectar. Intenta de nuevo.');
+  }
+}
+// en la arena: cada equipo aparece en su lado del mapa y cuenta 3, 2, 1… ¡YA!
+function startArena() {
+  arenaOn = true; curChap = 0; arenaDone = false; arenaSpecI = 0; arenaSpecShown = '';
+  aqScr.style.display = 'none'; mpScr.style.display = 'none'; hideArena(); hidePlay();
+  startAtWave(1); holdSpawn = true; pendingCrates = []; cratePlan = { __planned: true };
+  for (const id of ['wave', 'left']) document.getElementById(id).style.display = 'none';
+  const me = (arenaTeams || []).find(p => p.uid === myUid), mates = (arenaTeams || []).filter(p => me && p.team === me.team), slot = Math.max(0, mates.indexOf(me));
+  const mid = (A0 + A1) / 2;
+  ball.x = me && me.team === 1 ? A1 - 50 : A0 + 50; ball.y = mid + (slot - (mates.length - 1) / 2) * 34;
+  paused = true; resetJoy(); lastTap = null;
+  for (const id of ['joy', 'menuBtn', 'hint']) document.getElementById(id).style.display = 'none';
+  showSkillBtns(false); document.getElementById('nade').style.display = 'none';
+  const cd = document.getElementById('arenaCd'), steps = ['3', '2', '1', T('¡YA!')];
+  steps.forEach((txt, i) => setTimeout(() => {
+    cd.textContent = txt; cd.classList.toggle('go', i === 3); cd.style.display = 'block'; try { playClick(); } catch (e) {}
+    if (i === 3) {
+      paused = false;
+      document.getElementById('joy').style.display = 'flex'; document.getElementById('menuBtn').style.display = 'block';
+      document.getElementById('nade').style.display = 'flex'; showSkillBtns(true);
+      setTimeout(() => { cd.style.display = 'none'; }, 900);
+    }
+  }, 800 + i * 1000));
+}
+/* ----- pelea de la ARENA: las balas dañan al otro equipo; si te eliminan, miras a tus compañeros;
+   cuando un equipo elimina a todos los del otro, gana (60 monedas para cada ganador) ----- */
+const ARENA_DMG = 1, ARENA_HURT = .5, ARENA_HIT_R = 8, ARENA_PRIZE = 60;
+let arenaDone = false, arenaSpecI = 0, arenaSpecShown = '';
+const arenaMyTeam = () => { const q = (arenaTeams || []).find(a => a.uid === myUid); return q ? q.team : 0; };
+const arenaMatesAll = () => [...(netHost() ? NET.mates : NET.others).values()];
+function arenaBullets() {                         // (anfitrión) las balas contra los jugadores del otro equipo
+  const me = arenaMyTeam();
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i], own = b.own && b.own !== NET.me ? NET.mates.get(b.own) : null, bt = own ? own.team : me;
+    let hit = false;
+    if (!over && bt !== me && Math.hypot(b.x - ball.x, b.y - (ball.y - 8)) < ARENA_HIT_R) { hitPlayer(ARENA_DMG); hit = true; }
+    else for (const m of NET.mates.values()) {
+      if (m.down || m.gone || m.team === bt || m === own) continue;
+      if (Math.hypot(b.x - m.x, b.y - (m.y - 8)) < ARENA_HIT_R) {
+        swapSave = [ball.x, ball.y, hurt, over]; ball.x = m.x; ball.y = m.y; hurt = m.hurt || 0; over = false; curMate = m;
+        try { hitPlayer(ARENA_DMG); } finally { swapBack(); }
+        hit = true; break;
+      }
+    }
+    if (hit) bullets.splice(i, 1);
+  }
+}
+function arenaCheck() {                           // (anfitrión) ¿quedó algún equipo sin jugadores?
+  if (!netHost() || arenaDone) return;
+  const alive = [0, 0], me = arenaMyTeam();
+  if (!over) alive[me]++;
+  for (const m of NET.mates.values()) if (!m.down && !m.gone && (m.team === 0 || m.team === 1)) alive[m.team]++;
+  if (alive[0] && alive[1]) return;
+  const w = alive[0] ? 0 : alive[1] ? 1 : -1;
+  netSend({ t: 'awin', w }); arenaEnd(w);
+}
+function arenaSpecTarget() {                      // el compañero que estoy mirando
+  const me = arenaMyTeam(), list = arenaMatesAll().filter(m => m.team === me && !m.down && !m.gone);
+  const bar = document.getElementById('arSpec');
+  if (!list.length) { bar.style.display = 'none'; return null; }
+  arenaSpecI = ((arenaSpecI % list.length) + list.length) % list.length;
+  const tgt = list[arenaSpecI];
+  bar.style.display = 'flex';
+  if (arenaSpecShown !== tgt.tag) { arenaSpecShown = tgt.tag; document.getElementById('arSpecName').textContent = tgt.tag; }
+  const many = list.length > 1; for (const id of ['arSpecL', 'arSpecR']) document.getElementById(id).style.visibility = many ? 'visible' : 'hidden';
+  return tgt;
+}
+document.getElementById('arSpecL').addEventListener('click', () => { arenaSpecI--; playClick(); });
+document.getElementById('arSpecR').addEventListener('click', () => { arenaSpecI++; playClick(); });
+function arenaEnd(w) {
+  if (arenaDone) return; arenaDone = true;
+  const me = arenaMyTeam(), won = w === me;
+  paused = true; resetJoy();
+  for (const id of ['joy', 'menuBtn', 'nade', 'arSpec', 'mpWait']) document.getElementById(id).style.display = 'none';
+  showSkillBtns(false);
+  const tt = document.getElementById('arWinT');
+  tt.textContent = w < 0 ? T('¡EMPATE!') : T(w === 0 ? '¡GANA EL EQUIPO ROJO!' : '¡GANA EL EQUIPO AZUL!');
+  tt.className = 'ar-win-t ' + (w < 0 ? 'draw' : w === 0 ? 'red' : 'blue');
+  document.getElementById('arWinNames').textContent = w < 0 ? '' : (arenaTeams || []).filter(a => a.team === w).map(a => a.name).join(' · ');
+  const r = document.getElementById('arWinR');
+  if (won) { coins += ARENA_PRIZE; saveShop(); drawCoins(); r.textContent = '¡' + T('GANASTE') + '! +' + ARENA_PRIZE + ' ●'; r.className = 'ar-win-r'; }
+  else { r.textContent = T(w < 0 ? 'NADIE GANÓ' : 'PERDISTE'); r.className = 'ar-win-r lose'; }
+  try { playClick(); } catch (e) {}
+  setTimeout(() => { document.getElementById('arWin').style.display = 'flex'; }, 900);
+}
+document.getElementById('arWinOk').addEventListener('click', () => { playClick(); document.getElementById('arWin').style.display = 'none'; goMenu(); });
+const arenaTeamOf = name => { const p = (arenaTeams || []).find(q => q.name === name); return p ? p.team : -1; };
+document.querySelectorAll('.aq-mode').forEach(b => b.addEventListener('click', () => aqStart(+b.dataset.n)));
+document.getElementById('aqClose').addEventListener('click', () => { aqScr.style.display = 'none'; });
+document.getElementById('aqCancel').addEventListener('click', () => { aqStop(); playClick(); aqView('aqPick'); aqDraw(); });
+document.getElementById('aqOk').addEventListener('click', async () => { aqStop(); AQ.found = null; arenaTeams = null; aqScr.style.display = 'none'; if (mpGroup && !netOn()) await mpLeave(); });
+addEventListener('pagehide', () => { if (AQ.n) aqStop(); });
+let frInv = [];                                    // invitaciones que mandé { u: amigo, c: código, t }
+const frSeenInv = new Set();
+const frPlaying = () => typeof game !== 'undefined' && game.style.display === 'block';      // en una partida (solo o en grupo)
+const frCanInvite = () => !!mpGroup && !!mpCurCode && !frPlaying();
+function frInvite(f) {
+  if (!frCanInvite()) return;
+  frInv = frInv.filter(v => v.u !== f.uid); frInv.push({ u: f.uid, c: String(mpCurCode), t: Date.now() });
+  frPush(); playClick(); frDraw();
+  setTimeout(() => { frPush(); if (frScr.style.display === 'flex') frDraw(); }, 60500);
+}
+let invShown = null;
+function frCheckInvites(on) {                      // ¿algún amigo me invitó a su grupo?
+  if (frPlaying() || invShown) return;
+  for (const q of on.values()) {
+    if (!frIsFriend(q.uid) || q.pl) continue;
+    const v = (q.inv || []).find(x => x.u === myUid && String(x.c) === String(q.code) && !frSeenInv.has(q.uid + ':' + x.t));
+    if (!v || String(v.c) === String(mpCurCode)) continue;
+    frSeenInv.add(q.uid + ':' + v.t); invShown = { code: String(v.c) };
+    document.getElementById('invTxt').innerHTML = '';
+    const nb = document.createElement('b'); nb.textContent = q.name;
+    document.getElementById('invTxt').append('¡', nb, ' ' + T('TE INVITA A SU GRUPO!'));
+    document.getElementById('invPop').style.display = 'flex'; try { playClick(); } catch (e) {}
+    clearTimeout(frCheckInvites.t); frCheckInvites.t = setTimeout(() => { document.getElementById('invPop').style.display = 'none'; invShown = null; }, 20000);
+    return;
+  }
+}
 function frMe() {
   if (!userName) return null;
-  return { uid: myUid, name: userName, lv: myLevel(), code: mpGroup && mpCurCode ? String(mpCurCode) : '',
-    reqs: FR.out.filter(o => o.uid).map(o => o.uid).slice(-30), accs: FR.friends.map(f => f.uid).slice(-30) };
+  frInv = frInv.filter(v => Date.now() - v.t < 60000);   // las invitaciones duran 1 minuto
+  return { uid: myUid, name: userName, lv: myLevel(), pl: frPlaying() ? 1 : 0, inv: frInv.slice(-8), aq: AQ.n || 0, aqt: AQ.t || 0, aqc: AQ.n ? charSel : '', aqs: AQ.n ? String(curSkin(charSel)).slice(0, 20) : '', code: mpGroup && mpCurCode ? String(mpCurCode) : '',
+    reqs: FR.out.filter(o => o.uid).map(o => o.uid).slice(-30), accs: FR.friends.map(f => f.uid).slice(-30),
+    ow: pfMine(), ch: charSel, sk: String(curSkin(charSel)).slice(0, 20) };
 }
 function frPush() { try { DIR.meP = null; dirSetMe(frMe()); } catch (e) {} }
 // solicitudes que me llegaron (de jugadores conectados ahora)
@@ -5813,13 +6379,14 @@ function frSync() {
     if (!f && sent && ((q.accs || []).includes(myUid) || (q.reqs || []).includes(myUid))) { frAddFriend(q.uid, q.name); changed = true; }   // aceptó (o los dos se enviaron)
   }
   if (changed) { frSave(); frPush(); }
+  frCheckInvites(on);
   const n = frIncoming().length, dot = document.getElementById('frDot');
   dot.textContent = n; dot.style.display = n ? 'flex' : 'none';
   document.getElementById('frReqBtn').textContent = T('SOLICITUDES') + (n ? ' (' + n + ')' : '');
   if (frScr.style.display === 'flex') frDraw();
 }
 const frScr = document.getElementById('frScr');
-const frView = id => { for (const b of ['frMain', 'frAdd', 'frReqs']) document.getElementById(b).style.display = b === id ? 'flex' : 'none'; frDraw(); };
+const frView = id => { for (const b of ['frMain', 'frAdd', 'frReqs', 'frProf']) document.getElementById(b).style.display = b === id ? 'flex' : 'none'; frDraw(); };
 function frRow(name, sub, on, lv) {
   const r = document.createElement('div'); r.className = 'fr-row';
   const led = document.createElement('i'); led.className = 'led' + (on ? ' on' : '');
@@ -5836,8 +6403,19 @@ function frDraw() {
   for (const f of fs) {
     const q = on.get(f.uid);
     if (q && (q.lv | 0) > 0) f.lv = q.lv | 0;
-    const r = frRow(f.name, T(!q ? 'DESCONECTADO' : q.code ? 'EN UN GRUPO' : 'EN LÍNEA'), !!q, f.lv);
-    if (q && q.code && String(q.code) !== String(mpCurCode)) r.appendChild(frBtn('UNIRSE', 'blue', () => frJoin(q.code)));
+    if (q && Array.isArray(q.ow)) { const k = JSON.stringify([q.ow, q.ch, q.sk]); if (k !== JSON.stringify([f.ow, f.ch, f.sk])) { f.ow = q.ow.slice(0, 40); f.ch = q.ch; f.sk = q.sk; frSave(); } }
+    const r = frRow(f.name, T(!q ? 'DESCONECTADO' : q.pl ? 'JUGANDO' : q.code ? 'EN UN GRUPO' : 'EN LÍNEA'), !!q, f.lv);
+    if (q && !q.pl) {
+      const same = q.code && String(q.code) === String(mpCurCode);
+      if (q.code && !same) r.appendChild(frBtn('UNIRSE', 'blue', e => { e.stopPropagation(); frJoin(q.code); }));
+      else if (!same && frCanInvite()) {                 // estoy en un grupo: lo puedo invitar
+        const sent = frInv.some(v => v.u === f.uid && Date.now() - v.t < 60000);
+        const ib = frBtn(sent ? 'INVITADO ✔' : 'INVITAR', sent ? 'gray' : 'or', e => { e.stopPropagation(); if (!sent) frInvite(f); });
+        r.appendChild(ib);
+      }
+    }
+    r.classList.add('tap'); const go = document.createElement('span'); go.className = 'go'; go.textContent = '▶'; r.appendChild(go);
+    r.addEventListener('click', () => { playClick(); frProfile(f); });
     list.appendChild(r);
   }
   for (const o of FR.out) { if (frIsFriend(o.uid)) continue; const r = frRow(o.name, T('SOLICITUD ENVIADA'), false); r.style.opacity = '.65';
@@ -5852,6 +6430,46 @@ function frDraw() {
   }
   if (!rl.children.length) rl.appendChild(frNone('No tienes solicitudes de amistad.'));
 }
+// perfil de un amigo: nombre, nivel, personajes desbloqueados y sus skins
+let pfUid = null;
+function frProfile(f) {
+  pfUid = f.uid;
+  const q = frOnline().get(f.uid), d = q && Array.isArray(q.ow) ? { ow: q.ow, ch: q.ch, sk: q.sk, lv: q.lv } : { ow: f.ow, ch: f.ch, sk: f.sk, lv: f.lv };
+  document.getElementById('pfName').textContent = cleanName((q && q.name) || f.name) || '???';
+  const st = document.getElementById('pfSt'); st.textContent = T(!q ? 'DESCONECTADO' : q.pl ? 'JUGANDO' : q.code ? 'EN UN GRUPO' : 'EN LÍNEA'); st.className = 'pf-st' + (q ? ' on' : '');
+  const lv = document.getElementById('pfLv'); lv.innerHTML = ''; lv.append(T('NIVEL'), lvBadge(Math.max(1, Math.min(9999, d.lv | 0 || 1))));
+  const ch = CHARS.some(c => c.id === d.ch) ? d.ch : 'cam';
+  drawBustOn(document.getElementById('pfBust'), charImg(ch, d.sk && skinsOf(ch).some(k => k.id === d.sk) ? d.sk : null));
+  const box = document.getElementById('pfChars'); box.innerHTML = '';
+  const ow = Array.isArray(d.ow) ? d.ow : null, has = id => (CHARS.find(c => c.id === id) || {}).price === 0 || (ow && ow.includes(id));
+  let n = 0;
+  for (const c of CHARS) {
+    const mine = has(c.id); if (mine) n++;
+    const row = document.createElement('div'); row.className = 'pf-ch' + (mine ? '' : ' off');
+    const cv = document.createElement('canvas'); cv.width = 72; cv.height = 72; drawBustOn(cv, charImg(c.id, null));
+    const info = document.createElement('div'); info.className = 'info';
+    const nm = document.createElement('div'); nm.className = 'cn'; nm.textContent = T(c.name); info.appendChild(nm);
+    if (!mine) { const l = document.createElement('div'); l.className = 'lock'; l.textContent = '🔒 ' + T('NO DESBLOQUEADO'); info.appendChild(l); }
+    else {
+      const sks = document.createElement('div'); sks.className = 'pf-skins';
+      for (const k of skinsOf(c.id)) {
+        if (k.id === 'cafe' || !(k.price === 0 || (ow && ow.includes(k.id)))) continue;
+        const it = document.createElement('div'); it.className = 'pf-sk' + (ch === c.id && (d.sk || defSkin(c.id)) === k.id ? ' eq' : '');
+        const sc = document.createElement('canvas'); sc.width = 48; sc.height = 48; drawBustOn(sc, charImg(c.id, k.id));
+        const sn = document.createElement('span'); sn.textContent = k.price === 0 && k.name === 'PREDETERMINADO' ? 'NORMAL' : T(k.name); it.append(sc, sn); sks.appendChild(it);
+      }
+      info.appendChild(sks);
+    }
+    row.append(cv, info); box.appendChild(row);
+  }
+  document.getElementById('pfCount').textContent = n + '/' + CHARS.length;
+  document.getElementById('pfNote').textContent = ow ? (q ? '' : T('Así estaba la última vez que lo viste conectado.')) : T('Tu amigo tiene que conectarse para ver sus personajes.');
+  frView('frProf');
+}
+document.getElementById('frProfBack').addEventListener('click', () => { pfUid = null; frView('frMain'); frDraw(); });
+document.getElementById('invYes').addEventListener('click', () => { const c = invShown && invShown.code; document.getElementById('invPop').style.display = 'none'; invShown = null; if (c) { frScr.style.display = 'none'; frJoin(c); } });
+document.getElementById('invNo').addEventListener('click', () => { document.getElementById('invPop').style.display = 'none'; invShown = null; });
+document.getElementById('mpInvite').addEventListener('click', () => { playClick(); frScr.style.display = 'flex'; frView('frMain'); frSync(); });
 async function frJoin(code) {
   frScr.style.display = 'none';
   document.getElementById('menu').style.display = 'none';
@@ -5882,6 +6500,7 @@ document.getElementById('frAdd').addEventListener('submit', e => {
   msg.textContent = q ? T('¡Solicitud enviada!') : T('Solicitud guardada. Le llegará cuando ese jugador abra el juego.');
 });
 DIR.subs.add(frSync);
+DIR.subs.add(() => { if (aqScr.style.display === 'flex') aqDraw(); });
 /* ----- MISIONES DIARIAS: cada día salen 3 (una fácil, una media y una difícil; no se dice cuál es cuál) ----- */
 const MS_POOL = [
   [ ['k30', 'Elimina 30 inodoros', 30, 'kill'], ['w3', 'Llega a la oleada 3', 3, 'wave'], ['c1', 'Rompe 1 caja', 1, 'crate'],
