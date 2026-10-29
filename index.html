@@ -4470,7 +4470,7 @@ function drawArena(cv, t, priv) {
     }
     blitChar(c, src, 0, 1, -w / 2, -h, w, h); c.restore();
   };
-  const c0 = W / 2, L = [[c0 - 120, 104, 0], [c0 - 88, 140, 1.3], [c0 - 116, 158, 2.1]], R = [[c0 + 120, 104, .6], [c0 + 88, 140, 1.9], [c0 + 116, 158, 2.7]];   // equipos cerca del centro
+  const c0 = W / 2, sp = Math.max(0, W - 320) * .3, L = [[c0 - 120 - sp, 104, 0], [c0 - 88 - sp, 140, 1.3], [c0 - 116 - sp, 158, 2.1]], R = [[c0 + 120 + sp, 104, .6], [c0 + 88 + sp, 140, 1.9], [c0 + 116 + sp, 158, 2.7]];   // cada equipo hacia su lado (en la tarjeta ancha, más afuera)
   for (const [x, y, ph] of L) one(x + meet + Math.sin(t * 2 + ph) * 3, y, 48, true, ph, false);
   for (const [x, y, ph] of R) one(x - meet - Math.sin(t * 2 + ph) * 3, y, 48, false, ph, true);
   c.font = 'bold 26px "Press Start 2P", monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -6065,7 +6065,8 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.5';
+const GAME_VERSION = '1.5.01';
+const NEWS_VER = '1.5';                // 1.5.01 es un parche: el aviso sigue siendo el de la 1.5
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
   ['¡LLEGA LA ARENA!:', 'En JUGAR ahora eliges entre CAPÍTULOS y ARENA. En la Arena peleas EQUIPO ROJO contra EQUIPO AZUL.'],
@@ -6083,9 +6084,9 @@ try {
   const seen = localStorage.getItem('skibidi_seenver');
   const played = seen || localStorage.getItem('skibidi_name') || localStorage.getItem('skibidi_coins');
   // si ya habías jugado con otra versión: aviso al abrir
-  if (played && seen !== GAME_VERSION) {
-    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + GAME_VERSION;
-    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + GAME_VERSION + ' TRAE:';
+  if (played && !String(seen || '').startsWith(NEWS_VER)) {   // los parches 1.5.0x no repiten el aviso
+    document.getElementById('updVer').textContent = 'AHORA ESTÁS EN LA VERSIÓN ' + NEWS_VER;
+    document.getElementById('updNew').textContent = 'LA VERSIÓN ' + NEWS_VER + ' TRAE:';
     const ul = document.getElementById('updList');
     for (const [tt, tx] of NEWS) { const li = document.createElement('li'), b = document.createElement('b'); b.textContent = tt; li.append(b, ' ', tx); ul.appendChild(li); }
     document.getElementById('updScr').style.display = 'flex';
