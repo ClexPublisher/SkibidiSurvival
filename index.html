@@ -443,6 +443,11 @@
     .mp-code-in { font-size: 26px !important; padding: 4px 14px !important; }
     .mp-pub-box { min-height: 0; }
   }
+  .soon-cd { position: absolute; left: 12px; bottom: 12px; display: none; flex-direction: column; align-items: center; gap: 8px; max-width: min(48vw, 340px); padding: 10px 14px; font-family: 'Press Start 2P', monospace;
+    background: rgba(27, 27, 47, .88); border: 3px solid #ffe14d; box-shadow: 4px 4px 0 #000; pointer-events: none; text-align: center; animation: soonPulse 1.6s ease-in-out infinite; }
+  .soon-cd span { font-size: clamp(8px, 2.1vw, 11px); line-height: 1.7; color: #ffe14d; text-shadow: 2px 2px 0 #000; }
+  .soon-cd b { font-weight: normal; font-size: clamp(14px, 4vw, 24px); color: #ffe14d; letter-spacing: .08em; text-shadow: 2px 2px 0 #c0392b, 4px 4px 0 #000; }
+  @keyframes soonPulse { 50% { border-color: #ff8a1c; } }
   .mp-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 10px; }
   .mp-pad button { font-family: inherit; font-size: 20px; height: 60px; color: #fff; background: #34495e; border: 3px solid #1b1b2f; box-shadow: 3px 3px 0 #000; cursor: pointer; }
   .mp-pad button.ok { background: #27ae60; } .mp-pad button.del { background: #c0392b; font-size: 14px; }
@@ -878,7 +883,8 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.4</div>
+  <div class="ver">VERSIÓN 1.5.02</div>
+  <div class="soon-cd" id="soonCd"><span>LA VERDADERA MÁS GRANDE SE ACERCA…</span><b id="cdTime"></b></div>
 </div>
 
 <div class="dmg" id="dmg"></div>
@@ -6065,7 +6071,17 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.5.01';
+const GAME_VERSION = '1.5.02';
+/* ----- contador para la próxima actualización (hora de Chile, UTC-3): solo el tiempo que falta ----- */
+const CD_FROM = Date.parse('2026-11-01T16:20:00-03:00'), CD_TO = Date.parse('2026-11-04T15:00:00-03:00');
+function cdTick() {
+  const now = Date.now(), box = document.getElementById('soonCd'); if (!box) return;
+  if (now < CD_FROM || now >= CD_TO) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  const t = Math.ceil((CD_TO - now) / 1000), pad = n => String(n).padStart(2, '0');
+  document.getElementById('cdTime').textContent = pad(Math.floor(t / 3600)) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60);
+}
+setTimeout(() => { cdTick(); setInterval(cdTick, 1000); }, 0);
 const NEWS_VER = '1.5';                // 1.5.01 es un parche: el aviso sigue siendo el de la 1.5
 // lo nuevo de esta versión (sale en el aviso de actualización)
 const NEWS = [
@@ -6248,6 +6264,11 @@ function startArena() {
   const me = (arenaTeams || []).find(p => p.uid === myUid), mates = (arenaTeams || []).filter(p => me && p.team === me.team), slot = Math.max(0, mates.indexOf(me));
   const mid = (A0 + A1) / 2;
   ball.x = me && me.team === 1 ? A1 - 50 : A0 + 50; ball.y = mid + (slot - (mates.length - 1) / 2) * 34;
+  if (!canStand(ball.x, ball.y)) {                  // si cae encima de un auto u obstáculo, busca el lugar libre más cercano
+    let best = null;
+    for (let r = 4; r <= 90 && !best; r += 4) for (let k = 0; k < 16; k++) { const an = k * Math.PI / 8, x = ball.x + Math.cos(an) * r, y = ball.y + Math.sin(an) * r; if (canStand(x, y) && canStand(x + 3, y) && canStand(x - 3, y)) { best = [x, y]; break; } }
+    if (best) { ball.x = best[0]; ball.y = best[1]; }
+  }
   paused = true; resetJoy(); lastTap = null;
   for (const id of ['joy', 'menuBtn', 'hint']) document.getElementById(id).style.display = 'none';
   showSkillBtns(false); document.getElementById('nade').style.display = 'none';
