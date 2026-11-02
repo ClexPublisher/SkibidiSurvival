@@ -883,7 +883,7 @@
     <button class="sub set-btn" id="setBtn">AJUSTES</button>
     <button class="dbg-btn" id="dbgBtn" style="display:none">IR A OLEADA</button>
   </div>
-  <div class="ver">VERSIÓN 1.5.02</div>
+  <div class="ver">VERSIÓN 1.5.03</div>
   <div class="soon-cd" id="soonCd"><span>LA VERDADERA MÁS GRANDE SE ACERCA…</span><b id="cdTime"></b></div>
 </div>
 
@@ -6071,9 +6071,9 @@ for (const [id, key, lbl] of [['setSfx', 'sfx', 'sfxVal']]) {
 drawSettings();
 /* ----- versión del juego y avisos de actualización ----- */
 // al subir una versión nueva a GitHub, se cambia este número
-const GAME_VERSION = '1.5.02';
+const GAME_VERSION = '1.5.03';
 /* ----- contador para la próxima actualización (hora de Chile, UTC-3): solo el tiempo que falta ----- */
-const CD_FROM = Date.parse('2026-11-01T16:20:00-03:00'), CD_TO = Date.parse('2026-11-04T15:00:00-03:00');
+const CD_FROM = Date.parse('2026-11-01T16:20:00-03:00'), CD_TO = Date.parse('2026-11-05T16:30:00-03:00');
 function cdTick() {
   const now = Date.now(), box = document.getElementById('soonCd'); if (!box) return;
   if (now < CD_FROM || now >= CD_TO) { box.style.display = 'none'; return; }
